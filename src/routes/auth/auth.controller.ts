@@ -7,6 +7,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -20,6 +21,7 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @ApiBody({ type: LoginUserDto })
   async login(@Request() req: any) {
     return this.authService.login(req.user);
   }
@@ -31,12 +33,14 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
+  @ApiBearerAuth('JWT-auth')
   async logout(@Request() req: any) {
     return this.authService.logout(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
+  @ApiBearerAuth('JWT-auth')
   getProfile(@Request() req: any) {
     return req.user;
   }

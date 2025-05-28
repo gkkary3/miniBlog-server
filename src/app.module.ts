@@ -9,6 +9,9 @@ import ConfigModule from './config';
 // import { Board } from './entity/board.entity';
 // import { User } from './entity/user.entity';
 import { AuthModule } from './routes/auth/auth.module';
+import { CommentController } from './routes/comment/comment.controller';
+import { CommentModule } from './routes/comment/comment.module';
+import { PostsController } from './routes/posts/posts.controller';
 
 @Module({
   imports: [
@@ -27,8 +30,9 @@ import { AuthModule } from './routes/auth/auth.module';
     PostsModule,
     UserModule,
     AuthModule,
+    CommentModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, CommentController, PostsController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {

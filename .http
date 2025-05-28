@@ -1,3 +1,4 @@
+
 ### 유저 로그인
 POST http://localhost:3000/auth/login
 Content-Type: application/json
@@ -11,16 +12,16 @@ Content-Type: application/json
 GET http://localhost:3000/user
 
 ### 유저 하나 가져오기
-GET http://localhost:3000/user/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+GET http://localhost:3000/user/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDU4NzMzLCJleHAiOjE3NDg0NTk2MzN9.SKKqd87u1MLK4b6hJrOctJayFusr3su0tvtljXhu62M
 
 ### 유저 수정
-PUT http://localhost:3000/user/1  
+PUT http://localhost:3000/user/2  
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDU4NzMzLCJleHAiOjE3NDg0NTk2MzN9.SKKqd87u1MLK4b6hJrOctJayFusr3su0tvtljXhu62M
 
 {
-  "username": "관리자"
+  "username": "관리자1"
 }
 
 ### 유저 삭제
@@ -31,40 +32,51 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiO
 ###
 # 게시글 전체 가져오기
 GET http://localhost:3000/posts
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QMSIsImlhdCI6MTc0ODQ2MDMxOCwiZXhwIjoxNzQ4NDYxMjE4fQ.boOg11YgpK20HrC6r-mGouNUN72ir9aODcOygNcbhZA
 
 ### 게시글 하나 가져오기
-GET http://localhost:3000/posts/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+GET http://localhost:3000/posts/@admin/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDU4NzMzLCJleHAiOjE3NDg0NTk2MzN9.SKKqd87u1MLK4b6hJrOctJayFusr3su0tvtljXhu62M
 
 ###
 # 게시글 생성
-POST http://localhost:3000/posts
+POST http://localhost:3000/posts/@admin/write
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDU3Mzg5LCJleHAiOjE3NDg0NTgyODl9.gbzzrPnD0u1zMOoVJkx7bXXqJDDQODHJv0HV65Vl1ks
 
 {
-  "userId": 1,
-  "title": "게시글 제목1",
-  "content": "게시글 내용1"
+  "title": "게시글 제목3",
+  "content": "게시글 내용3"
 }
 
 ### 게시글 수정
-PUT http://localhost:3000/posts/2
+PUT http://localhost:3000/posts/@admin/2
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QMSIsImlhdCI6MTc0ODQ1ODkwMCwiZXhwIjoxNzQ4NDU5ODAwfQ.ZOMOYnarmqv1iJpfXudRpNJLmvK1Qs94Xc8S7P6NcUs
 
 {
-  "title": "게시글 제목11",
-  "content": "게시글 내용11"
+  "title": "게시글 제목111",
+  "content": "게시글 내용111"
 }
 
 ### 게시글 삭제
-DELETE http://localhost:3000/posts/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+DELETE http://localhost:3000/posts/@admin/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDU3Mzg5LCJleHAiOjE3NDg0NTgyODl9.gbzzrPnD0u1zMOoVJkx7bXXqJDDQODHJv0HV65Vl1ks
 
 # ================================================
+### 댓글 생성
+POST http://localhost:3000/posts/@admin/2/comments
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDU3Mzg5LCJleHAiOjE3NDg0NTgyODl9.gbzzrPnD0u1zMOoVJkx7bXXqJDDQODHJv0HV65Vl1ks
 
+{ 
+  "userId": 1,
+  "postId": 2,
+  "content": "댓글 내용1"
+}
+
+
+# ================================================
 ### 유저 로그인
 POST http://localhost:3000/auth/login
 Content-Type: application/json
@@ -80,14 +92,15 @@ Content-Type: application/json
 
 {
   "username": "관리자",
+  "userId": "admin",
   "email": "admin@example.com",
   "password": "admin123!@#"
 }
 
 ### 유저 로그아웃
 POST http://localhost:3000/auth/logout
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDU1NjU3LCJleHAiOjE3NDg0NTY1NTd9.cR7_Uk8zlw3XTCh3CNQSfFzPWLFDn8A5OCIv-W2FMNw
 
 ### 유저 정보 가져오기
 GET http://localhost:3000/auth/profile 
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDQxMjg2LCJleHAiOjE3NDg0NDIxODZ9.FAk7W5Qf49WdhmdfCDZC-w6uR4_UyDytBTn5V3_gVX4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDU1NjcxLCJleHAiOjE3NDg0NTY1NzF9.r07f03lQ5l-pOsxP2Fjl9gZJINqn1Xq_oBdoglVajzw

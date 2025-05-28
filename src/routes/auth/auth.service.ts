@@ -62,18 +62,27 @@ export class AuthService {
   }
 
   async signup(body: SignupUserDto) {
-    const { username, email, password } = body;
+    const { username, email, userId, password } = body;
     const encryptedPassword = await this.encryptPassword(password);
     const user = await this.userRepository.findOne({
       where: { email },
+    });
+
+    const userIdCheck = await this.userRepository.findOne({
+      where: { userId },
     });
 
     if (user) {
       throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
     }
 
+    if (userIdCheck) {
+      throw new HttpException('User ID already exists', HttpStatus.BAD_REQUEST);
+    }
+
     const newUser = this.userRepository.create({
       username,
+      userId,
       email,
       password: encryptedPassword,
     });
@@ -84,8 +93,8 @@ export class AuthService {
     });
   }
 
-  async logout(userId: number) {
-    await this.userRepository.update(userId, { refreshToken: null });
+  async logout(id: number) {
+    await this.userRepository.update(id, { refreshToken: null });
     return {
       message: 'Logout successful. Refresh token has been invalidated.',
     };
@@ -105,8 +114,8 @@ export class AuthService {
 
       // DB에서 사용자 및 refreshToken 확인
       const user = await this.userRepository.findOne({
-        where: { id: payload.userId, refreshToken },
-        select: ['id', 'email', 'username', 'refreshToken'],
+        where: { id: payload.id, refreshToken },
+        select: ['id', 'email', 'userId', 'username', 'refreshToken'],
       });
 
       if (!user) {
