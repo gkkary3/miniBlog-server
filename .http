@@ -1,0 +1,93 @@
+### 유저 로그인
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin123!@#"
+}
+
+### 유저 전체 가져오기
+GET http://localhost:3000/user
+
+### 유저 하나 가져오기
+GET http://localhost:3000/user/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+
+### 유저 수정
+PUT http://localhost:3000/user/1  
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+
+{
+  "username": "관리자"
+}
+
+### 유저 삭제
+DELETE http://localhost:3000/user/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+
+# ================================================
+###
+# 게시글 전체 가져오기
+GET http://localhost:3000/posts
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+
+### 게시글 하나 가져오기
+GET http://localhost:3000/posts/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+
+###
+# 게시글 생성
+POST http://localhost:3000/posts
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+
+{
+  "userId": 1,
+  "title": "게시글 제목1",
+  "content": "게시글 내용1"
+}
+
+### 게시글 수정
+PUT http://localhost:3000/posts/2
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+
+{
+  "title": "게시글 제목11",
+  "content": "게시글 내용11"
+}
+
+### 게시글 삭제
+DELETE http://localhost:3000/posts/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+
+# ================================================
+
+### 유저 로그인
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin123!@#"
+}
+
+### 유저 회원가입
+POST http://localhost:3000/auth/signup
+Content-Type: application/json
+
+{
+  "username": "관리자",
+  "email": "admin@example.com",
+  "password": "admin123!@#"
+}
+
+### 유저 로그아웃
+POST http://localhost:3000/auth/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDM2MTEzLCJleHAiOjE3NDg0MzcwMTN9.nFhPefftnBc073NjAHb4xPyFNOgr11HZUnJQAI9MKCo
+
+### 유저 정보 가져오기
+GET http://localhost:3000/auth/profile 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDQxMjg2LCJleHAiOjE3NDg0NDIxODZ9.FAk7W5Qf49WdhmdfCDZC-w6uR4_UyDytBTn5V3_gVX4
