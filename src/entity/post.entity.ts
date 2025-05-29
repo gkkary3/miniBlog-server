@@ -28,6 +28,9 @@ export class Post {
   @Column()
   userId: number;
 
+  @Column({ length: 100 })
+  username: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

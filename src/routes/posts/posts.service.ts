@@ -44,7 +44,7 @@ export class PostsService {
     return post;
   }
 
-  async create(body: CreatePostDto, userId: number) {
+  async create(body: CreatePostDto, userId: number, username: string) {
     const { categories, ...postData } = body;
 
     // categories 문자열 배열을 Category 엔티티로 변환
@@ -69,6 +69,7 @@ export class PostsService {
     const post = this.postRepository.create({
       ...postData,
       userId,
+      username,
       categories: categoryEntities,
     });
 

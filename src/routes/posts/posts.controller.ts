@@ -67,7 +67,7 @@ export class PostsController {
     description: '새로운 게시글을 작성합니다.',
   })
   create(@Body() body: CreatePostDto, @Request() req: any) {
-    return this.postsService.create(body, req.user.id);
+    return this.postsService.create(body, req.user.id, req.user.username);
   }
 
   @Put('@:userId/:id')
