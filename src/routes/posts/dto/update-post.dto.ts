@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import CreatePostDto from './create-post.dto';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdatePostDto extends PartialType(CreatePostDto) {
@@ -19,4 +19,13 @@ export class UpdatePostDto extends PartialType(CreatePostDto) {
   @IsNotEmpty()
   @IsString()
   content: string;
+
+  @ApiProperty({
+    description: '게시글 카테고리',
+    example: ['1', '2', '3'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  categories: string[];
 }

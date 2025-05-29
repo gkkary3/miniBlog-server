@@ -32,11 +32,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiO
 ###
 # 게시글 전체 가져오기
 GET http://localhost:3000/posts
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QMSIsImlhdCI6MTc0ODQ2MDMxOCwiZXhwIjoxNzQ4NDYxMjE4fQ.boOg11YgpK20HrC6r-mGouNUN72ir9aODcOygNcbhZA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QMSIsImlhdCI6MTc0ODUxMjE3MSwiZXhwIjoxNzQ4NTEzMDcxfQ.BH9H2mi1V1hEJ_J8ZiqQNxfjtrzuSd4K5C_WN5jgU2w
 
 ### 게시글 하나 가져오기
 GET http://localhost:3000/posts/@admin/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDU4NzMzLCJleHAiOjE3NDg0NTk2MzN9.SKKqd87u1MLK4b6hJrOctJayFusr3su0tvtljXhu62M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QMSIsImlhdCI6MTc0ODUxMjE3MSwiZXhwIjoxNzQ4NTEzMDcxfQ.BH9H2mi1V1hEJ_J8ZiqQNxfjtrzuSd4K5C_WN5jgU2w
 
 ###
 # 게시글 생성
@@ -62,6 +62,18 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiO
 ### 게시글 삭제
 DELETE http://localhost:3000/posts/@admin/2
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QIiwiaWF0IjoxNzQ4NDU3Mzg5LCJleHAiOjE3NDg0NTgyODl9.gbzzrPnD0u1zMOoVJkx7bXXqJDDQODHJv0HV65Vl1ks
+
+### 게시글 좋아요 확인
+GET http://localhost:3000/posts/@admin/2/likes
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QMSIsImlhdCI6MTc0ODUxMjE3MSwiZXhwIjoxNzQ4NTEzMDcxfQ.BH9H2mi1V1hEJ_J8ZiqQNxfjtrzuSd4K5C_WN5jgU2w
+
+### 게시글 좋아요
+POST http://localhost:3000/posts/@admin/2/like
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QMSIsImlhdCI6MTc0ODUxMjE3MSwiZXhwIjoxNzQ4NTEzMDcxfQ.BH9H2mi1V1hEJ_J8ZiqQNxfjtrzuSd4K5C_WN5jgU2w
+
+### 게시글 좋아요 취소
+DELETE http://localhost:3000/posts/@admin/2/like
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoi6rSA66as7J6QMSIsImlhdCI6MTc0ODUwOTAwMiwiZXhwIjoxNzQ4NTA5OTAyfQ.Seo0khlKlu8nLWvREAMWDQrBIioJTsawmNlGBX04HK4
 
 # ================================================
 ### 댓글 생성

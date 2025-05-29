@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
 import { Post } from './post.entity';
 import { Exclude } from 'class-transformer';
@@ -37,4 +38,7 @@ export class User {
 
   @Column({ type: 'varchar', nullable: true, select: false })
   refreshToken: string | null;
+
+  @ManyToMany(() => Post, (post) => post.likedUsers)
+  likedPosts: Post[];
 }

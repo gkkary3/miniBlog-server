@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export default class CreatePostDto {
@@ -17,4 +17,13 @@ export default class CreatePostDto {
   @IsNotEmpty()
   @IsString()
   content: string;
+
+  @ApiProperty({
+    description: '게시글 카테고리',
+    example: ['1', '2', '3'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  categories: string[];
 }

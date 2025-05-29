@@ -7,9 +7,12 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  JoinTable,
+  ManyToMany,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Comment } from './comments.entity';
+import { Category } from './category.entity';
 
 @Entity()
 export class Post {
@@ -37,4 +40,14 @@ export class Post {
 
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
+
+  @ManyToMany(() => User, (user) => user.likedPosts)
+  @JoinTable()
+  likedUsers: User[];
+
+  @ManyToMany(() => Category, (category) => category.posts, {
+    cascade: true,
+  })
+  @JoinTable()
+  categories: Category[];
 }

@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from 'src/entity/post.entity';
 import { User } from 'src/entity/user.entity';
+import { Category } from 'src/entity/category.entity';
 import { Repository } from 'typeorm';
 import CreatePostDto from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -18,6 +19,8 @@ export class PostsService {
     private postRepository: Repository<Post>,
     @InjectRepository(Comment)
     private commentRepository: Repository<Comment>,
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
   ) {}
 
   async findAll() {
@@ -33,7 +36,7 @@ export class PostsService {
   async findOne(id: number) {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['comments'],
+      relations: ['comments', 'likedUsers', 'categories'],
     });
 
     if (!post) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
@@ -42,7 +45,34 @@ export class PostsService {
   }
 
   async create(body: CreatePostDto, userId: number) {
-    return await this.postRepository.save({ ...body, userId });
+    const { categories, ...postData } = body;
+
+    // categories 문자열 배열을 Category 엔티티로 변환
+    const categoryEntities: Category[] = [];
+    if (categories && categories.length > 0) {
+      // 각 카테고리 이름으로 Category 엔티티를 찾거나 생성
+      for (const categoryName of categories) {
+        let category = await this.categoryRepository.findOne({
+          where: { name: categoryName },
+        });
+
+        // 카테고리가 존재하지 않으면 새로 생성
+        if (!category) {
+          category = this.categoryRepository.create({ name: categoryName });
+          category = await this.categoryRepository.save(category);
+        }
+
+        categoryEntities.push(category);
+      }
+    }
+
+    const post = this.postRepository.create({
+      ...postData,
+      userId,
+      categories: categoryEntities,
+    });
+
+    return await this.postRepository.save(post);
   }
 
   async update(id: number, data: UpdatePostDto) {
@@ -50,7 +80,35 @@ export class PostsService {
 
     if (!post) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 
-    await this.postRepository.update(id, { ...data });
+    const { categories, ...updateData } = data;
+
+    // categories가 포함된 경우 Category 엔티티로 변환
+    if (categories) {
+      const categoryEntities: Category[] = [];
+      for (const categoryName of categories) {
+        let category = await this.categoryRepository.findOne({
+          where: { name: categoryName },
+        });
+
+        // 카테고리가 존재하지 않으면 새로 생성
+        if (!category) {
+          category = this.categoryRepository.create({ name: categoryName });
+          category = await this.categoryRepository.save(category);
+        }
+
+        categoryEntities.push(category);
+      }
+
+      // 게시글 업데이트 (categories 포함)
+      await this.postRepository.save({
+        ...post,
+        ...updateData,
+        categories: categoryEntities,
+      });
+    } else {
+      // categories가 없는 경우 일반 업데이트
+      await this.postRepository.update(id, updateData);
+    }
 
     return this.postRepository.findOneBy({ id });
   }
@@ -97,5 +155,53 @@ export class PostsService {
       where: { userId },
       relations: ['user'], // 필요시 user 정보도 포함
     });
+  }
+
+  async getLikes(id: number, userId: number) {
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['likedUsers'],
+    });
+
+    if (!post) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+
+    const isLiked = post.likedUsers.some((user) => user.id === userId);
+
+    return {
+      ...post,
+      isLiked,
+      likeCount: post.likedUsers.length,
+    };
+  }
+  async likePost(id: number, userId: number) {
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['likedUsers'],
+    });
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+
+    if (!post || !user)
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+
+    if (post.likedUsers.find((u) => u.id === userId))
+      return { message: 'Already liked' };
+
+    post.likedUsers.push(user);
+    await this.postRepository.save(post);
+    return { message: 'Post liked' };
+  }
+
+  async unlikePost(id: number, userId: number) {
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['likedUsers'],
+    });
+
+    if (!post) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+
+    post.likedUsers = post.likedUsers.filter((u) => u.id !== userId);
+    await this.postRepository.save(post);
+    return { message: 'Post unliked' };
   }
 }
