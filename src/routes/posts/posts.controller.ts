@@ -20,6 +20,7 @@ import { UserService } from '../user/user.service';
 
 @Controller('posts')
 @ApiTags('posts')
+@ApiBearerAuth('JWT-auth')
 export class PostsController {
   constructor(
     private readonly postsService: PostsService,
@@ -27,12 +28,12 @@ export class PostsController {
   ) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.postsService.findAll();
   }
 
   @Get('@:userId')
-  @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
   async getPostsByUserId(@Param('userId') userId: string) {
     const cleanUserId = userId.startsWith('@') ? userId.slice(1) : userId;
@@ -43,21 +44,18 @@ export class PostsController {
   }
 
   @Get('@:userId/:id')
-  // @ApiBearerAuth('JWT-auth')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: number) {
     return this.postsService.findOne(id);
   }
 
   @Post('@:userId/write')
-  @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
   create(@Body() body: CreatePostDto, @Request() req: any) {
     return this.postsService.create(body, req.user.id);
   }
 
   @Put('@:userId/:id')
-  @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
   update(@Param('id') id: number, @Body() body: UpdatePostDto) {
     console.log('postsController - update', id, body);
@@ -65,21 +63,18 @@ export class PostsController {
   }
 
   @Delete('@:userId/:id')
-  @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
   delete(@Param('id') id: number) {
     return this.postsService.delete(id);
   }
 
   @Get('@:userId/:id/comments')
-  @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
   findComments(@Param('id') id: number) {
     return this.postsService.findComments(id);
   }
 
   @Post('@:userId/:id/comments')
-  @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
   createComment(@Param('id') id: number, @Body() body: CreateCommentDto) {
     console.log('postsController - createComment', id, body);
@@ -87,7 +82,6 @@ export class PostsController {
   }
 
   @Put('@:userId/:id/comments/:commentId')
-  @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
   updateComment(
     @Param('id') id: number,
@@ -98,14 +92,12 @@ export class PostsController {
   }
 
   @Get('@:userId/:id/likes')
-  @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
   getLikes(@Param('id') id: number, @Request() req: any) {
     return this.postsService.getLikes(id, req.user.id);
   }
 
   @Post('@:userId/:id/like')
-  @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
   likePost(@Param('id') id: number, @Request() req: any) {
     console.log('postsController - likePost', id, req.user.id);
@@ -113,7 +105,6 @@ export class PostsController {
   }
 
   @Delete('@:userId/:id/like')
-  @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
   unlikePost(@Param('id') id: number, @Request() req: any) {
     return this.postsService.unlikePost(id, req.user.id);
