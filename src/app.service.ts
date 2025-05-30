@@ -9,8 +9,8 @@ export class AppService {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>MiniBlog API Server</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        <title>MiniBlog API</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         <style>
           * {
             margin: 0;
@@ -20,402 +20,375 @@ export class AppService {
           
           body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f8fafc;
-            color: #334155;
+            background: #ffffff;
+            color: #1f2937;
             line-height: 1.6;
-            padding: 40px 20px;
+            overflow-x: hidden;
           }
           
           .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
           }
           
           .header {
+            padding: 4rem 2rem 2rem;
             text-align: center;
-            padding: 60px 40px 40px;
-            border-bottom: 1px solid #f1f5f9;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: relative;
+          }
+          
+          .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+          }
+          
+          .header-content {
+            position: relative;
+            z-index: 1;
           }
           
           .title {
-            font-size: 2.5rem;
-            font-weight: 600;
-            color: #0f172a;
-            margin-bottom: 12px;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
           }
           
           .subtitle {
-            font-size: 1.125rem;
-            color: #64748b;
-            margin-bottom: 16px;
+            font-size: 1.25rem;
+            opacity: 0.9;
+            font-weight: 400;
+            margin-bottom: 2rem;
           }
           
-          .badge {
+          .version-badge {
             display: inline-block;
-            padding: 6px 12px;
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 20px;
-            color: #475569;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
             font-size: 0.875rem;
             font-weight: 500;
+            backdrop-filter: blur(10px);
           }
           
-          .content {
-            padding: 40px;
+          .main-content {
+            flex: 1;
+            padding: 3rem 2rem;
           }
           
-          .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1px;
-            margin: 40px 0;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            overflow: hidden;
-          }
-          
-          .feature-card {
-            background: white;
-            padding: 24px;
-            border-right: 1px solid #e2e8f0;
-            border-bottom: 1px solid #e2e8f0;
-          }
-          
-          .feature-card:nth-child(even) {
+          .quick-start {
             background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
           }
           
-          .feature-card:nth-child(3n) {
-            border-right: none;
-          }
-          
-          .feature-icon {
+          .section-title {
             font-size: 1.5rem;
-            margin-bottom: 12px;
-            display: block;
-          }
-          
-          .feature-title {
-            font-size: 1.125rem;
             font-weight: 600;
-            color: #0f172a;
-            margin-bottom: 8px;
+            margin-bottom: 1rem;
+            color: #1f2937;
           }
           
-          .feature-description {
-            color: #64748b;
-            font-size: 0.9rem;
-          }
-          
-          .action-buttons {
+          .api-buttons {
             display: flex;
-            gap: 12px;
+            gap: 1rem;
             justify-content: center;
-            margin: 40px 0;
+            margin: 2rem 0;
             flex-wrap: wrap;
           }
           
           .btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border-radius: 6px;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border-radius: 8px;
             font-weight: 500;
             font-size: 0.9rem;
             text-decoration: none;
-            border: 1px solid #e2e8f0;
-            transition: all 0.15s ease;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
           }
           
           .btn-primary {
             background: #3b82f6;
             color: white;
-            border-color: #3b82f6;
           }
           
           .btn-primary:hover {
             background: #2563eb;
-            border-color: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
           }
           
           .btn-secondary {
             background: white;
             color: #374151;
+            border-color: #d1d5db;
           }
           
           .btn-secondary:hover {
             background: #f9fafb;
+            border-color: #9ca3af;
+            transform: translateY(-1px);
           }
           
-          .guide-section {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 32px;
-            margin: 40px 0;
+          .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
           }
           
-          .guide-title {
-            font-size: 1.25rem;
+          .feature-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+          }
+          
+          .feature-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+          }
+          
+          .feature-title {
+            font-size: 1.125rem;
             font-weight: 600;
-            color: #0f172a;
-            margin-bottom: 24px;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
           }
           
-          .guide-steps {
+          .feature-description {
+            color: #6b7280;
+            font-size: 0.9rem;
+          }
+          
+          .auth-required {
+            color: #dc2626;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          
+          .public-access {
+            color: #059669;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          
+          .steps {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+          }
+          
+          .step-list {
             list-style: none;
-          }
-          
-          .guide-step {
-            margin: 16px 0;
-            padding-left: 32px;
-            position: relative;
-            color: #4b5563;
-            counter-increment: step;
-          }
-          
-          .guide-steps {
             counter-reset: step;
           }
           
-          .guide-step::before {
+          .step-item {
+            counter-increment: step;
+            margin: 1rem 0;
+            padding-left: 3rem;
+            position: relative;
+            font-size: 0.95rem;
+            color: #4b5563;
+          }
+          
+          .step-item::before {
             content: counter(step);
             position: absolute;
             left: 0;
             top: 0;
-            width: 20px;
-            height: 20px;
+            width: 1.75rem;
+            height: 1.75rem;
             background: #3b82f6;
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 600;
           }
           
-          .code-snippet {
+          .code {
             background: #f1f5f9;
-            border: 1px solid #e2e8f0;
+            color: #475569;
+            padding: 0.25rem 0.5rem;
             border-radius: 4px;
-            padding: 2px 6px;
             font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 0.8rem;
-            color: #475569;
-          }
-          
-          .status-section {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin: 40px 0;
-            flex-wrap: wrap;
-          }
-          
-          .status-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            color: #475569;
-          }
-          
-          .status-public {
-            border-color: #10b981;
-            background: #f0fdf4;
-            color: #059669;
-          }
-          
-          .status-auth {
-            border-color: #f59e0b;
-            background: #fffbeb;
-            color: #d97706;
-          }
-          
-          .footer {
-            text-align: center;
-            padding: 40px;
-            border-top: 1px solid #f1f5f9;
-            background: #f8fafc;
+            font-size: 0.85rem;
           }
           
           .tech-stack {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin: 16px 0;
+            gap: 1rem;
+            margin: 2rem 0;
             flex-wrap: wrap;
           }
           
           .tech-item {
-            padding: 4px 8px;
-            background: white;
+            padding: 0.5rem 1rem;
+            background: #f8fafc;
             border: 1px solid #e2e8f0;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            color: #64748b;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: #475569;
+            font-weight: 500;
           }
           
-          .footer-text {
-            color: #94a3b8;
+          .footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid #f3f4f6;
+            background: #f9fafb;
+            color: #6b7280;
             font-size: 0.875rem;
-            margin: 8px 0;
           }
           
           @media (max-width: 768px) {
-            body {
-              padding: 20px 16px;
+            .header {
+              padding: 2rem 1rem 1rem;
             }
             
             .title {
               font-size: 2rem;
             }
             
-            .header {
-              padding: 40px 24px 24px;
-            }
-            
-            .content {
-              padding: 24px;
+            .main-content {
+              padding: 2rem 1rem;
             }
             
             .features-grid {
               grid-template-columns: 1fr;
             }
             
-            .feature-card {
-              border-right: none;
-            }
-            
-            .action-buttons {
+            .api-buttons {
               flex-direction: column;
               align-items: center;
             }
             
             .btn {
               width: 100%;
-              max-width: 200px;
+              max-width: 250px;
               justify-content: center;
-            }
-            
-            .guide-section {
-              padding: 24px;
             }
           }
         </style>
       </head>
       <body>
         <div class="container">
-          <div class="header">
-            <h1 class="title">MiniBlog API</h1>
-            <p class="subtitle">나만의 블로그를 만들어보세요! 🎨</p>
-            <span class="badge">✨ 완전 무료</span>
-          </div>
+          <header class="header">
+            <div class="header-content">
+              <h1 class="title">MiniBlog API</h1>
+              <p class="subtitle">블로그 플랫폼을 위한 RESTful API</p>
+              <span class="version-badge">v1.0</span>
+            </div>
+          </header>
           
-          <div class="content">
-            <div class="features-grid">
-              <div class="feature-card">
-                <span class="feature-icon">👤</span>
-                <h3 class="feature-title">회원가입 & 로그인</h3>
-                <p class="feature-description">간단한 이메일로 가입하고, 안전하게 로그인할 수 있어요. 토큰 기반이라 보안도 든든!</p>
+          <main class="main-content">
+            <section class="quick-start">
+              <h2 class="section-title">빠른 시작</h2>
+              <div class="api-buttons">
+                <a href="/api" class="btn btn-primary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                  </svg>
+                  API 문서 보기
+                </a>
+                <a href="/posts" class="btn btn-secondary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,10.5A1.5,1.5 0 0,1 13.5,12A1.5,1.5 0 0,1 12,13.5A1.5,1.5 0 0,1 10.5,12A1.5,1.5 0 0,1 12,10.5Z" />
+                  </svg>
+                  게시글 보기
+                </a>
               </div>
-              
-              <div class="feature-card">
-                <span class="feature-icon">✍️</span>
-                <h3 class="feature-title">글 쓰기 & 수정</h3>
-                <p class="feature-description">마음껏 글을 쓰고, 언제든지 수정하거나 삭제할 수 있어요. 내 글은 내가 관리!</p>
-              </div>
-              
-              <div class="feature-card">
-                <span class="feature-icon">💬</span>
-                <h3 class="feature-title">댓글 달기</h3>
-                <p class="feature-description">재미있는 글에는 댓글을 남겨보세요. 다른 사람들과 소통하는 재미가 쏠쏠!</p>
-              </div>
-              
-              <div class="feature-card">
-                <span class="feature-icon">❤️</span>
-                <h3 class="feature-title">좋아요 누르기</h3>
-                <p class="feature-description">마음에 드는 글에는 좋아요를 눌러주세요. 작성자가 기뻐할 거예요!</p>
-              </div>
-              
-              <div class="feature-card">
-                <span class="feature-icon">📁</span>
-                <h3 class="feature-title">카테고리 분류</h3>
-                <p class="feature-description">요리, 여행, 일상 등... 원하는 카테고리로 글을 깔끔하게 정리해보세요!</p>
-              </div>
-              
-              <div class="feature-card">
-                <span class="feature-icon">📖</span>
-                <h3 class="feature-title">다른 사람 글 구경하기</h3>
-                <p class="feature-description">다른 사람들이 올린 재미있는 글들을 마음껏 읽어보세요. 새로운 이야기가 가득!</p>
-              </div>
-            </div>
+            </section>
 
-            <div class="action-buttons">
-              <a href="/api" class="btn btn-primary">
-                📖 API 사용법 보기
-              </a>
-              <a href="/posts" class="btn btn-secondary">
-                📝 어떤 글들이 있나?
-              </a>
-            </div>
-
-            <div class="guide-section">
-              <h3 class="guide-title">🚀 5분만에 시작하기</h3>
-              <div class="guide-steps">
-                <div class="guide-step">
-                  <span class="code-snippet">POST /auth/signup</span> 또는 <span class="code-snippet">POST /auth/login</span>으로 가입/로그인
-                </div>
-                <div class="guide-step">
-                  받은 <span class="code-snippet">accessToken</span>을 복사해두세요
-                </div>
-                <div class="guide-step">
-                  Swagger 페이지에서 우상단 <strong>🔓 "Authorize"</strong> 클릭
-                </div>
-                <div class="guide-step">
-                  토큰을 붙여넣기 하고 인증 완료!
-                </div>
-                <div class="guide-step">
-                  이제 글쓰기, 댓글, 좋아요 모든 기능 사용 가능! 🎉
-                </div>
+            <section class="features-grid">
+              <div class="feature-card">
+                <div class="feature-title">회원 인증</div>
+                <div class="feature-description">JWT 기반 사용자 인증으로 안전한 회원가입과 로그인 제공</div>
+                <div class="public-access">누구나 이용</div>
               </div>
-            </div>
-
-            <div class="status-section">
-              <div class="status-item status-public">
-                <span>🟢</span>
-                누구나 볼 수 있어요
+              
+              <div class="feature-card">
+                <div class="feature-title">게시글 관리</div>
+                <div class="feature-description">카테고리 기능과 함께 블로그 게시글 작성, 조회, 수정, 삭제</div>
+                <div class="auth-required">로그인 필요</div>
               </div>
-              <div class="status-item status-auth">
-                <span>🔒</span>
-                로그인이 필요해요
+              
+              <div class="feature-card">
+                <div class="feature-title">댓글 시스템</div>
+                <div class="feature-description">게시글에 댓글을 추가하고 관리할 수 있는 인증 기반 댓글 시스템</div>
+                <div class="auth-required">로그인 필요</div>
               </div>
-            </div>
-          </div>
+              
+              <div class="feature-card">
+                <div class="feature-title">좋아요 기능</div>
+                <div class="feature-description">마음에 드는 게시글에 좋아요를 누르거나 취소할 수 있는 기능</div>
+                <div class="auth-required">로그인 필요</div>
+              </div>
+            </section>
 
-          <div class="footer">
+            <section class="steps">
+              <h2 class="section-title">사용 방법</h2>
+              <ol class="step-list">
+                <li class="step-item">
+                  <span class="code">POST /auth/signup</span> 또는 <span class="code">POST /auth/login</span>으로 회원가입 또는 로그인
+                </li>
+                <li class="step-item">
+                  응답에서 받은 <span class="code">accessToken</span>을 복사
+                </li>
+                <li class="step-item">
+                  <span class="code">/api</span> 페이지에서 우상단의 "Authorize" 버튼 클릭
+                </li>
+                <li class="step-item">
+                  복사한 토큰을 붙여넣기하고 인증 완료
+                </li>
+                <li class="step-item">
+                  이제 모든 보호된 엔드포인트에 접근 가능
+                </li>
+              </ol>
+            </section>
+
             <div class="tech-stack">
               <span class="tech-item">NestJS</span>
               <span class="tech-item">TypeORM</span>
               <span class="tech-item">PostgreSQL</span>
               <span class="tech-item">JWT</span>
               <span class="tech-item">Swagger</span>
-              <span class="tech-item">Supabase</span>
             </div>
-            <p class="footer-text">💡 개발자를 위한 완전 무료 블로그 API</p>
-            <p class="footer-text">🌐 Render + Supabase로 안정적으로 호스팅</p>
-          </div>
+          </main>
+
+          <footer class="footer">
+            <p>Render + Supabase로 배포</p>
+          </footer>
         </div>
       </body>
       </html>
