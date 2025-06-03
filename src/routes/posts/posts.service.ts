@@ -24,7 +24,18 @@ export class PostsService {
   ) {}
 
   async findAll() {
-    return await this.postRepository.find();
+    return await this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.user', 'user')
+      .leftJoinAndSelect('post.likedUsers', 'likedUser')
+      .select([
+        'post', // Post의 모든 필드
+        'user.userId', // 작성자의 userId
+        'user.email', // 작성자의 email
+        'likedUser.id', // 좋아요 누른 사용자들의 id만
+        'likedUser.userId', // 좋아요 누른 사용자들의 userId만
+      ])
+      .getMany();
   }
 
   // async getPostsByUserId(userId: number) {
