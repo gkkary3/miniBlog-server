@@ -70,4 +70,15 @@ export class AuthController {
   async refresh(@Body() body: { refreshToken: string }) {
     return this.authService.refresh(body.refreshToken);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '사용자 정보 조회',
+    description: '현재 로그인된 사용자의 정보를 조회합니다.',
+  })
+  me(@Request() req: any) {
+    return req.user;
+  }
 }
