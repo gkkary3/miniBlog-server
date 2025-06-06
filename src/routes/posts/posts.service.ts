@@ -134,19 +134,21 @@ export class PostsService {
   }
 
   async findComments(id: number) {
-    const post = await this.postRepository.findOneBy({ id });
+    const comment = await this.commentRepository.find({
+      where: { postId: id },
+    });
 
-    if (!post) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    if (!comment) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 
-    return post.comments;
+    return comment;
   }
 
-  async createComment(id: number, body: CreateCommentDto) {
+  async createComment(id: number, body: CreateCommentDto, userId: number) {
     const post = await this.postRepository.findOneBy({ id });
 
     if (!post) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 
-    return this.commentRepository.save({ ...body, postId: id });
+    return this.commentRepository.save({ ...body, postId: id, userId });
   }
 
   async updateComment(id: number, commentId: number, body: UpdateCommentDto) {

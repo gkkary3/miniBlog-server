@@ -16,7 +16,7 @@ export class SignupUserDto {
   @ApiProperty({
     description: '이메일 주소',
     example: 'user@example.com',
-    minLength: 5,
+    minLength: 10,
     maxLength: 100,
   })
   @IsNotEmpty()
@@ -27,7 +27,7 @@ export class SignupUserDto {
   @ApiProperty({
     description: '사용자 ID (고유 식별자)',
     example: 'kkary',
-    minLength: 2,
+    minLength: 3,
     maxLength: 15,
   })
   @IsNotEmpty()

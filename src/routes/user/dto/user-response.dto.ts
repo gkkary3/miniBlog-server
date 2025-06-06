@@ -17,6 +17,13 @@ export class UserResponseDto {
   username: string;
 
   @ApiProperty({
+    description: '사용자 지정 ID',
+    example: 'user123',
+  })
+  @Expose()
+  userId: string;
+
+  @ApiProperty({
     description: '사용자 이메일',
     example: 'user@example.com',
   })

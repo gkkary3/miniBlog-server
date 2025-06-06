@@ -106,9 +106,13 @@ export class PostsController {
     summary: '댓글 작성',
     description: '게시글에 새 댓글을 작성합니다.',
   })
-  createComment(@Param('id') id: number, @Body() body: CreateCommentDto) {
+  createComment(
+    @Param('id') id: number,
+    @Body() body: CreateCommentDto,
+    @Request() req: any,
+  ) {
     console.log('postsController - createComment', id, body);
-    return this.postsService.createComment(id, body);
+    return this.postsService.createComment(id, body, req.user.id);
   }
 
   @Put('@:userId/:id/comments/:commentId')
