@@ -6,7 +6,6 @@
 
 - **홈페이지**: [https://miniblog-server.onrender.com/](https://miniblog-server.onrender.com/)
 - **API 문서**: [https://miniblog-server.onrender.com/api](https://miniblog-server.onrender.com/api)
-- **게시글 API**: [https://miniblog-server.onrender.com/posts](https://miniblog-server.onrender.com/posts)
 
 ## 기능
 
