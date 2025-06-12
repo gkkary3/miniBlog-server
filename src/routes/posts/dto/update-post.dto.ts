@@ -1,6 +1,12 @@
 import { PartialType } from '@nestjs/mapped-types';
 import CreatePostDto from './create-post.dto';
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ArrayMaxSize,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdatePostDto extends PartialType(CreatePostDto) {
@@ -28,4 +34,18 @@ export class UpdatePostDto extends PartialType(CreatePostDto) {
   @IsArray()
   @IsString({ each: true })
   categories: string[];
+
+  @ApiProperty({
+    description: '수정할 게시글 이미지 URL 배열 (최대 100개)',
+    example: [
+      'http://localhost:4000/uploads/image-1234567890-123456789.jpg',
+      'http://localhost:4000/uploads/image-1234567890-987654321.png',
+    ],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(100)
+  @IsString({ each: true })
+  images?: string[];
 }

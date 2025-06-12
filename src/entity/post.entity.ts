@@ -25,6 +25,9 @@ export class Post {
   @Column('text')
   content: string;
 
+  @Column('text', { array: true, nullable: true })
+  images: string[];
+
   @Column()
   userId: number;
 

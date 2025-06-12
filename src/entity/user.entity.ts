@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Post } from './post.entity';
 import { Exclude } from 'class-transformer';
+import { Comment } from './comments.entity';
 
 @Entity()
 export class User {
@@ -41,4 +42,7 @@ export class User {
 
   @ManyToMany(() => Post, (post) => post.likedUsers)
   likedPosts: Post[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments: Comment[];
 }

@@ -3,14 +3,19 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './exceptions/http.exceptions';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   // CORS 설정 추가
   app.enableCors({
     origin: 'http://localhost:3000', // Next.js 클라이언트 주소
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
+  });
+  // 정적 파일 서빙 설정 추가
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
   });
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());

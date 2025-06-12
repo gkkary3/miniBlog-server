@@ -89,9 +89,22 @@ export class AuthService {
     });
     const savedUser = await this.userRepository.save(newUser);
 
-    return plainToInstance(UserResponseDto, savedUser, {
+    const payload = {
+      id: savedUser.id,
+      email: savedUser.email,
+      username: savedUser.username,
+      userId: savedUser.userId,
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = await this.generateRefreshToken(savedUser.id);
+
+    return {
+      user: plainToInstance(UserResponseDto, savedUser),
+      accessToken,
+      refreshToken,
       excludeExtraneousValues: true,
-    });
+    };
   }
 
   async logout(id: number) {

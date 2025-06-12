@@ -9,6 +9,8 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { Comment } from 'src/entity/comments.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { SearchPostsDto, SortType } from './dto/search-posts.dto';
+import { GetUserPostsDto } from './dto/get-user-posts.dto';
 
 @Injectable()
 export class PostsService {
@@ -23,8 +25,61 @@ export class PostsService {
     private categoryRepository: Repository<Category>,
   ) {}
 
-  async findAll() {
-    return await this.postRepository
+  async searchPosts(searchDto: SearchPostsDto) {
+    const queryBuilder = this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.user', 'user')
+      .leftJoinAndSelect('post.categories', 'categories')
+      .leftJoinAndSelect('post.likedUsers', 'likedUser')
+      .leftJoinAndSelect('post.comments', 'comments');
+
+    if (searchDto.search) {
+      queryBuilder.andWhere(
+        '(post.title ILIKE :search OR post.content ILIKE :search OR post.username ILIKE :search OR categories.name ILIKE :search OR user.userId ILIKE :search)',
+        { search: `%${searchDto.search}%` },
+      );
+    }
+
+    if (searchDto.sortBy === SortType.LATEST) {
+      queryBuilder.orderBy('post.createdAt', 'DESC');
+    } else if (searchDto.sortBy === SortType.LIKES) {
+      queryBuilder
+        .addSelect((subQuery) => {
+          return subQuery
+            .select('COUNT(*)')
+            .from('post_liked_users_user', 'plu')
+            .where('plu."postId" = post.id');
+        }, 'likescount')
+        .orderBy('likescount', 'DESC');
+    } else if (searchDto.sortBy === SortType.COMMENTS) {
+      queryBuilder
+        .addSelect((subQuery) => {
+          return subQuery
+            .select('COUNT(*)')
+            .from('comment', 'c')
+            .where('c."postId" = post.id');
+        }, 'commentscount')
+        .orderBy('commentscount', 'DESC');
+    }
+
+    if (searchDto.page && searchDto.limit) {
+      queryBuilder.skip((searchDto.page - 1) * searchDto.limit);
+      queryBuilder.take(searchDto.limit);
+    }
+
+    const [posts, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      posts,
+      total,
+      page: searchDto.page || 1,
+      limit: searchDto.limit || 10,
+      totalPages: Math.ceil(total / (searchDto.limit || 10)),
+    };
+  }
+
+  async findAll(page: number = 1, limit: number = 10) {
+    const queryBuilder = this.postRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.likedUsers', 'likedUser')
@@ -35,14 +90,21 @@ export class PostsService {
         'likedUser.id', // 좋아요 누른 사용자들의 id만
         'likedUser.userId', // 좋아요 누른 사용자들의 userId만
       ])
-      .getMany();
-  }
+      .orderBy('post.createdAt', 'DESC');
 
-  // async getPostsByUserId(userId: number) {
-  //   return await this.postRepository.find({
-  //     where: { id },
-  //   });
-  // }
+    queryBuilder.skip((page - 1) * limit);
+    queryBuilder.take(limit);
+
+    const [posts, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      posts,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
 
   async findOne(id: number) {
     const post = await this.postRepository.findOne({
@@ -57,7 +119,7 @@ export class PostsService {
 
   async create(body: CreatePostDto, userId: number, username: string) {
     const { categories, ...postData } = body;
-
+    console.log(body);
     // categories 문자열 배열을 Category 엔티티로 변환
     const categoryEntities: Category[] = [];
     if (categories && categories.length > 0) {
@@ -134,13 +196,14 @@ export class PostsService {
   }
 
   async findComments(id: number) {
-    const comment = await this.commentRepository.find({
+    const comments = await this.commentRepository.find({
       where: { postId: id },
+      relations: ['user'],
     });
 
-    if (!comment) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    if (!comments) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 
-    return comment;
+    return comments;
   }
 
   async createComment(id: number, body: CreateCommentDto, userId: number) {
@@ -164,11 +227,56 @@ export class PostsService {
     return this.commentRepository.findOneBy({ id: commentId });
   }
 
-  async getPostsByUserId(userId: number) {
-    return await this.postRepository.find({
-      where: { userId },
-      relations: ['user'], // 필요시 user 정보도 포함
-    });
+  async getPostsByUserId(userId: number, queryDto: GetUserPostsDto) {
+    const page = queryDto.page || 1;
+    const limit = queryDto.limit || 10;
+    const search = queryDto.search;
+
+    const queryBuilder = this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.user', 'user')
+      .leftJoinAndSelect('post.categories', 'categories')
+      .where('post.userId = :userId', { userId })
+      .orderBy('post.createdAt', 'DESC');
+
+    // 검색 조건 추가 (있을 때만)
+    if (queryDto.search && queryDto.search.trim()) {
+      queryBuilder.andWhere(
+        '(post.title ILIKE :search OR post.content ILIKE :search OR categories.name ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    // 페이지네이션 적용
+    queryBuilder.skip((page - 1) * limit);
+    queryBuilder.take(limit);
+
+    const [posts, total] = await queryBuilder.getManyAndCount();
+
+    // 댓글/좋아요 수 계산
+    const postsWithCounts = await Promise.all(
+      posts.map(async (post) => {
+        const [commentCount, likeCount] = await Promise.all([
+          this.commentRepository.count({ where: { postId: post.id } }),
+          this.postRepository
+            .createQueryBuilder('post')
+            .innerJoin('post.likedUsers', 'likedUsers')
+            .where('post.id = :postId', { postId: post.id })
+            .getCount(),
+        ]);
+
+        return { ...post, commentCount, likeCount };
+      }),
+    );
+
+    return {
+      posts: postsWithCounts,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      searchTerm: search || null, // 클라이언트에서 현재 검색어 확인용
+    };
   }
 
   async getLikes(id: number, userId: number) {

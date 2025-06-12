@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -16,7 +17,9 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { JwtAuthGuard } from 'src/routes/auth/guards/jwt-auth.guard';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { SearchPostsDto } from './dto/search-posts.dto';
 import { UserService } from '../user/user.service';
+import { GetUserPostsDto } from './dto/get-user-posts.dto';
 
 @Controller('posts')
 @ApiTags('posts')
@@ -28,26 +31,39 @@ export class PostsController {
 
   @Get()
   @ApiOperation({
-    summary: '전체 게시글 조회',
-    description: '모든 게시글 목록을 조회합니다.',
+    summary: '게시글 검색',
+    description:
+      '제목, 내용, 작성자, 카테고리 등 다양한 조건으로 게시글을 검색합니다.',
   })
-  findAll() {
-    return this.postsService.findAll();
+  searchPosts(@Query() searchDto: SearchPostsDto) {
+    return this.postsService.searchPosts(searchDto);
   }
 
+  // @Get()
+  // @ApiOperation({
+  //   summary: '전체 게시글 조회',
+  //   description: '모든 게시글 목록을 조회합니다.',
+  // })
+  // findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
+  //   return this.postsService.findAll(page, limit);
+  // }
+
   @Get('@:userId')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '특정 사용자 게시글 조회',
     description: '특정 사용자가 작성한 모든 게시글을 조회합니다.',
   })
-  async getPostsByUserId(@Param('userId') userId: string) {
+  async getPostsByUserId(
+    @Param('userId') userId: string,
+    @Query() queryDto: GetUserPostsDto,
+  ) {
     const cleanUserId = userId.startsWith('@') ? userId.slice(1) : userId;
 
     const user = await this.userService.getUserByUserId(cleanUserId);
 
-    return this.postsService.getPostsByUserId(user.id);
+    return this.postsService.getPostsByUserId(user.id, queryDto);
   }
 
   @Get('@:userId/:id')
@@ -67,6 +83,7 @@ export class PostsController {
     description: '새로운 게시글을 작성합니다.',
   })
   create(@Body() body: CreatePostDto, @Request() req: any) {
+    console.log('postsController - create', body);
     return this.postsService.create(body, req.user.id, req.user.username);
   }
 
