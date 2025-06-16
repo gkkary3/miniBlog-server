@@ -62,4 +62,99 @@ export class UserService {
 
     return user;
   }
+
+  async followUser(userId: string, followerId: number) {
+    const targetUser = await this.userRepository.findOne({
+      where: { userId },
+      relations: ['followers'],
+    });
+
+    const follower = await this.userRepository.findOne({
+      where: { id: followerId },
+      relations: ['following'],
+    });
+
+    if (!follower || !targetUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (targetUser.id === followerId) {
+      throw new HttpException(
+        'You cannot follow yourself',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (targetUser.followers.some((user) => user.id === followerId)) {
+      throw new HttpException('Already following', HttpStatus.BAD_REQUEST);
+    }
+
+    targetUser.followers.push(follower);
+    await this.userRepository.save(targetUser);
+
+    return { message: 'Followed successfully' };
+  }
+
+  async unFollowUser(userId: string, followerId: number) {
+    const targetUser = await this.userRepository.findOne({
+      where: { userId },
+      relations: ['followers'],
+    });
+
+    const follower = await this.userRepository.findOne({
+      where: { id: followerId },
+      relations: ['following'],
+    });
+
+    if (!follower || !targetUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (targetUser.id === followerId) {
+      throw new HttpException(
+        'You cannot follow yourself',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (!targetUser.followers.some((user) => user.id === followerId)) {
+      throw new HttpException(
+        'Not following this user',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    targetUser.followers = targetUser.followers.filter(
+      (user) => user.id !== followerId,
+    );
+
+    await this.userRepository.save(targetUser);
+
+    return { message: 'Unfollowed successfully' };
+  }
+
+  async getFollowers(userId: string) {
+    const user = await this.userRepository.findOne({
+      where: { userId },
+      relations: ['followers'],
+    });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return user.followers;
+  }
+
+  async getFollowing(userId: string) {
+    const user = await this.userRepository.findOne({
+      where: { userId },
+      relations: ['following'],
+    });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return user.following;
+  }
 }

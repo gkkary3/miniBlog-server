@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
   ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { Post } from './post.entity';
 import { Exclude } from 'class-transformer';
@@ -45,4 +46,21 @@ export class User {
 
   @OneToMany(() => Comment, (comment) => comment.user)
   comments: Comment[];
+
+  @ManyToMany(() => User, (user) => user.followers)
+  @JoinTable({
+    name: 'user_followers_user', // 테이블 이름 명시
+    joinColumn: {
+      name: 'userId_1',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'userId_2',
+      referencedColumnName: 'id',
+    },
+  })
+  following: User[];
+
+  @ManyToMany(() => User, (user) => user.following)
+  followers: User[];
 }
