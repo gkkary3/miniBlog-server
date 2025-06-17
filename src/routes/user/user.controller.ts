@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -68,6 +69,7 @@ export class UserController {
     description: '사용자를 팔로우합니다.',
   })
   async followUser(@Param('userId') userId: string, @Request() req: any) {
+    console.log('req.user:', req.user);
     return this.userService.followUser(userId, req.user.id);
   }
 
@@ -87,8 +89,11 @@ export class UserController {
     summary: '특정 사용자의 팔로워 조회',
     description: '특정 사용자의 팔로워 목록을 조회합니다.',
   })
-  async getFollowers(@Param('userId') userId: string) {
-    return this.userService.getFollowers(userId);
+  async getFollowers(
+    @Param('userId') userId: string,
+    @Query('currentUserId') currentUserId?: number,
+  ) {
+    return this.userService.getFollowers(userId, currentUserId);
   }
 
   @Get(':userId/following')
@@ -96,7 +101,10 @@ export class UserController {
     summary: '특정 사용자의 팔로잉 조회',
     description: '특정 사용자의 팔로잉 목록을 조회합니다.',
   })
-  async getFollowing(@Param('userId') userId: string) {
-    return this.userService.getFollowing(userId);
+  async getFollowing(
+    @Param('userId') userId: string,
+    @Query('currentUserId') currentUserId?: number,
+  ) {
+    return this.userService.getFollowing(userId, currentUserId);
   }
 }

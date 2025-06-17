@@ -269,6 +269,14 @@ export class PostsService {
       }),
     );
 
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['followers', 'following'],
+    });
+
+    const followerCount = user?.followers?.length ?? 0;
+    const followingCount = user?.following?.length ?? 0;
+
     return {
       posts: postsWithCounts,
       total,
@@ -276,6 +284,8 @@ export class PostsService {
       limit,
       totalPages: Math.ceil(total / limit),
       searchTerm: search || null, // 클라이언트에서 현재 검색어 확인용
+      followerCount,
+      followingCount,
     };
   }
 
