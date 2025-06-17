@@ -17,7 +17,7 @@ import {
 import { JwtAuthGuard } from 'src/routes/auth/guards/jwt-auth.guard';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-
+import { Express } from 'express';
 @Controller('upload')
 export class UploadController {
   @Post('image')
