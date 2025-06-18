@@ -63,28 +63,31 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @Post(':userId/follow')
+  @Post('@:userId/follow')
   @ApiOperation({
     summary: '사용자 팔로우',
     description: '사용자를 팔로우합니다.',
   })
   async followUser(@Param('userId') userId: string, @Request() req: any) {
-    console.log('req.user:', req.user);
-    return this.userService.followUser(userId, req.user.id);
+    const cleanUserId = userId.startsWith('@') ? userId.slice(1) : userId;
+    return this.userService.followUser(cleanUserId, req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @Delete(':userId/follow')
+  @Delete('@:userId/follow')
   @ApiOperation({
     summary: '사용자 언팔로우',
     description: '사용자를 언팔로우합니다.',
   })
   async unfollowUser(@Param('userId') userId: string, @Request() req: any) {
-    return this.userService.unFollowUser(userId, req.user.id);
+    const cleanUserId = userId.startsWith('@') ? userId.slice(1) : userId;
+    console.log('cleanUserId:', cleanUserId);
+    console.log('req.user.id:', req.user.id);
+    return this.userService.unFollowUser(cleanUserId, req.user.id);
   }
 
-  @Get(':userId/followers')
+  @Get('@:userId/followers')
   @ApiOperation({
     summary: '특정 사용자의 팔로워 조회',
     description: '특정 사용자의 팔로워 목록을 조회합니다.',
@@ -93,10 +96,11 @@ export class UserController {
     @Param('userId') userId: string,
     @Query('currentUserId') currentUserId?: number,
   ) {
-    return this.userService.getFollowers(userId, currentUserId);
+    const cleanUserId = userId.startsWith('@') ? userId.slice(1) : userId;
+    return this.userService.getFollowers(cleanUserId, currentUserId);
   }
 
-  @Get(':userId/following')
+  @Get('@:userId/following')
   @ApiOperation({
     summary: '특정 사용자의 팔로잉 조회',
     description: '특정 사용자의 팔로잉 목록을 조회합니다.',
@@ -105,6 +109,22 @@ export class UserController {
     @Param('userId') userId: string,
     @Query('currentUserId') currentUserId?: number,
   ) {
-    return this.userService.getFollowing(userId, currentUserId);
+    const cleanUserId = userId.startsWith('@') ? userId.slice(1) : userId;
+    return this.userService.getFollowing(cleanUserId, currentUserId);
+  }
+
+  @Get('@:userId/follow-status')
+  @ApiOperation({
+    summary: '특정 사용자 팔로우 상태 조회',
+    description:
+      '현재 로그인한 사용자가 특정 사용자를 팔로우하고 있는지 확인합니다.',
+  })
+  async getFollowStatus(
+    @Param('userId') userId: string,
+    @Query('currentUserId') currentUserId?: number,
+  ) {
+    const cleanUserId = userId.startsWith('@') ? userId.slice(1) : userId;
+    const user = await this.userService.getUserByUserId(cleanUserId);
+    return this.userService.getFollowStatus(user.id, Number(currentUserId));
   }
 }

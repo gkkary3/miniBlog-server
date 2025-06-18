@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   // CORS 설정 추가
   app.enableCors({
-    origin: 'http://localhost:3000', // Next.js 클라이언트 주소
+    origin: ['http://localhost:3000', 'https://boolog.vercel.app'], // Next.js 클라이언트 주소
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });

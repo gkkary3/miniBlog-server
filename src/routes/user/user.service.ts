@@ -195,4 +195,25 @@ export class UserService {
 
     return followingWithIsFollowing;
   }
+
+  async getFollowStatus(userId: number, currentUserId?: number) {
+    if (!currentUserId) {
+      return {
+        isFollowing: false,
+      };
+    }
+
+    const currentUser = await this.userRepository.findOne({
+      where: { id: currentUserId },
+      relations: ['following'],
+    });
+
+    if (!currentUser) {
+      throw new HttpException('Current user not found', HttpStatus.NOT_FOUND);
+    }
+
+    return {
+      isFollowing: currentUser.following.some((f) => f.id === userId),
+    };
+  }
 }
