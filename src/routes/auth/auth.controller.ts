@@ -15,6 +15,7 @@ import { SignupUserDto } from './dto/signup-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
+import { User } from 'src/entity/user.entity';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -61,10 +62,15 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google 로그인 콜백' })
-  async googleAuthCallback(@Request() req: any, @Res() res: Response) {
+  googleAuthCallback(@Request() req: any, @Res() res: Response) {
     // 프론트엔드로 리다이렉트 (토큰과 함께)
-    const { accessToken, refreshToken } = req.user;
-    const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`;
+    const { accessToken, refreshToken, user } = req.user as {
+      accessToken: string;
+      refreshToken: string;
+      user: User;
+    };
+    const userData = encodeURIComponent(JSON.stringify(user));
+    const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}&user=${userData}`;
     res.redirect(redirectUrl);
   }
 
@@ -79,10 +85,15 @@ export class AuthController {
   @Get('kakao/callback')
   @UseGuards(AuthGuard('kakao'))
   @ApiOperation({ summary: 'Kakao 로그인 콜백' })
-  async kakaoAuthCallback(@Request() req: any, @Res() res: Response) {
+  kakaoAuthCallback(@Request() req: any, @Res() res: Response) {
     // 프론트엔드로 리다이렉트 (토큰과 함께)
-    const { accessToken, refreshToken } = req.user;
-    const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`;
+    const { accessToken, refreshToken, user } = req.user as {
+      accessToken: string;
+      refreshToken: string;
+      user: User;
+    };
+    const userData = encodeURIComponent(JSON.stringify(user));
+    const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}&user=${userData}`;
     res.redirect(redirectUrl);
   }
 }
