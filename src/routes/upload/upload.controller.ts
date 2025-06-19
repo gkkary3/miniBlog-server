@@ -17,7 +17,20 @@ import {
 import { JwtAuthGuard } from 'src/routes/auth/guards/jwt-auth.guard';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { Express } from 'express';
+
+// Multer 파일 타입 정의
+interface MulterFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  destination: string;
+  filename: string;
+  path: string;
+  buffer: Buffer;
+}
+
 @Controller('upload')
 export class UploadController {
   @Post('image')
@@ -105,7 +118,7 @@ export class UploadController {
       },
     }),
   )
-  uploadImage(@UploadedFile() file: Express.Multer.File) {
+  uploadImage(@UploadedFile() file: MulterFile) {
     if (!file) {
       throw new BadRequestException('파일이 업로드되지 않았습니다.');
     }
