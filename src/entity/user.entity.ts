@@ -29,6 +29,15 @@ export class User {
   @Column({ select: false })
   password: string;
 
+  @Column({ nullable: true })
+  provider: string; // 'local', 'google', 'kakao'
+
+  @Column({ nullable: true })
+  providerId: string; // 소셜 플랫폼에서 제공하는 고유 ID
+
+  @Column({ nullable: true })
+  profileImage: string; // 소셜 플랫폼에서 제공하는 프로필 이미지
+
   @CreateDateColumn()
   createdAt: Date;
 

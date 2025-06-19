@@ -8,6 +8,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthController } from './auth.controller';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { KakaoStrategy } from './strategies/kakao.strategy';
 
 @Module({
   imports: [
@@ -20,7 +22,14 @@ import { AuthController } from './auth.controller';
       },
     }),
   ],
-  providers: [AuthService, LocalStrategy, UserService, JwtStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    UserService,
+    JwtStrategy,
+    GoogleStrategy,
+    KakaoStrategy,
+  ],
   exports: [AuthService],
   controllers: [AuthController],
 })

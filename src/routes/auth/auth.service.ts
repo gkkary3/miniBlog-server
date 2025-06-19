@@ -147,8 +147,74 @@ export class AuthService {
       });
 
       return { accessToken: newAccessToken };
-    } catch (error) {
+    } catch {
       throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
+  }
+
+  // 소셜 로그인 처리 메서드
+  async handleSocialLogin(socialUser: {
+    email: string;
+    username: string;
+    provider: string;
+    providerId: string;
+    profileImage?: string;
+  }) {
+    // 기존 사용자 확인 (provider와 providerId로)
+    let user = await this.userRepository.findOne({
+      where: {
+        provider: socialUser.provider,
+        providerId: socialUser.providerId,
+      },
+    });
+
+    // 기존 사용자가 없다면 이메일로도 확인
+    if (!user) {
+      user = await this.userRepository.findOne({
+        where: { email: socialUser.email },
+      });
+    }
+
+    if (user) {
+      // 기존 사용자 업데이트 (프로필 이미지 등)
+      await this.userRepository.update(user.id, {
+        profileImage: socialUser.profileImage,
+        username: socialUser.username,
+      });
+    } else {
+      // 새 사용자 생성
+      const newUser = this.userRepository.create({
+        email: socialUser.email,
+        username: socialUser.username,
+        userId: `${socialUser.provider}_${socialUser.providerId}`, // 고유한 userId 생성
+        provider: socialUser.provider,
+        providerId: socialUser.providerId,
+        profileImage: socialUser.profileImage,
+        password: '', // 소셜 로그인은 비밀번호 없음
+      });
+      user = await this.userRepository.save(newUser);
+    }
+
+    // JWT 토큰 생성
+    const payload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      userId: user.userId,
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = await this.generateRefreshToken(user.id);
+
+    // refreshToken 저장
+    await this.userRepository.update(user.id, { refreshToken });
+
+    return {
+      user: plainToInstance(UserResponseDto, user, {
+        excludeExtraneousValues: true,
+      }),
+      accessToken,
+      refreshToken,
+    };
   }
 }
