@@ -27,6 +27,11 @@ export class AuthController {
   @ApiOperation({ summary: '회원가입' })
   @ApiBody({ type: SignupUserDto })
   async signup(@Body() signupUserDto: SignupUserDto) {
+    console.log(
+      '🔍 Signup request body:',
+      JSON.stringify(signupUserDto, null, 2),
+    );
+    console.log('🔍 Request headers:', JSON.stringify(signupUserDto, null, 2));
     return this.authService.signup(signupUserDto);
   }
 
