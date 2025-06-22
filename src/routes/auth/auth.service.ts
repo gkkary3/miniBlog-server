@@ -64,43 +64,31 @@ export class AuthService {
   }
 
   async signup(body: SignupUserDto) {
-    console.log('🔍 Starting signup process...');
-    console.log('🔍 Signup body:', JSON.stringify(body, null, 2));
-
     const { username, email, userId, password } = body;
     const encryptedPassword = await this.encryptPassword(password);
-
-    console.log('🔍 Checking for existing user with email:', email);
     const user = await this.userRepository.findOne({
       where: { email },
     });
 
-    console.log('🔍 Checking for existing user with userId:', userId);
     const userIdCheck = await this.userRepository.findOne({
       where: { userId },
     });
 
     if (user) {
-      console.log('❌ User with email already exists:', email);
       throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
     }
 
     if (userIdCheck) {
-      console.log('❌ User with userId already exists:', userId);
       throw new HttpException('User ID already exists', HttpStatus.BAD_REQUEST);
     }
 
-    console.log('✅ No existing user found, creating new user...');
     const newUser = this.userRepository.create({
       username,
       userId,
       email,
       password: encryptedPassword,
     });
-
-    console.log('🔍 Attempting to save user to database...');
     const savedUser = await this.userRepository.save(newUser);
-    console.log('✅ User saved successfully:', savedUser.id);
 
     const payload = {
       id: savedUser.id,
@@ -112,7 +100,6 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = await this.generateRefreshToken(savedUser.id);
 
-    console.log('✅ Signup completed successfully');
     return {
       user: plainToInstance(UserResponseDto, savedUser),
       accessToken,
