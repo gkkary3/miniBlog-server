@@ -8,6 +8,7 @@ import { UserResponseDto } from '../user/dto/user-response.dto';
 import { SignupUserDto } from './dto/signup-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { SocialSignupDto } from './dto/social-signup.dto';
 
 @Injectable()
 export class AuthService {
@@ -181,36 +182,83 @@ export class AuthService {
         profileImage: socialUser.profileImage,
         username: socialUser.username,
       });
+      // JWT 토큰 생성
+      const payload = {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        userId: user.userId,
+      };
+
+      const accessToken = this.jwtService.sign(payload);
+      const refreshToken = await this.generateRefreshToken(user.id);
+
+      // refreshToken 저장
+      await this.userRepository.update(user.id, { refreshToken });
+
+      return {
+        user: plainToInstance(UserResponseDto, user, {
+          excludeExtraneousValues: true,
+        }),
+        accessToken,
+        refreshToken,
+        isNewUser: false,
+      };
     } else {
-      // 새 사용자 생성
-      const newUser = this.userRepository.create({
+      return {
+        isNewUser: true,
         email: socialUser.email,
-        username: socialUser.username,
-        userId: `${socialUser.provider}_${socialUser.providerId}`, // 고유한 userId 생성
         provider: socialUser.provider,
         providerId: socialUser.providerId,
         profileImage: socialUser.profileImage,
-        password: '', // 소셜 로그인은 비밀번호 없음
-      });
-      user = await this.userRepository.save(newUser);
+        tempUsername: socialUser.username, // 임시 사용자명 (선택사항)
+      };
     }
+  }
+
+  async completeSocialSignup(signupData: SocialSignupDto) {
+    const { email, username, userId, provider, providerId, profileImage } =
+      signupData;
+
+    // userId 중복 확인
+    const existingUser = await this.userRepository.findOne({
+      where: { userId },
+    });
+
+    if (existingUser) {
+      throw new HttpException(
+        '이미 사용 중인 사용자 ID입니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // 새 사용자 생성
+    const newUser = this.userRepository.create({
+      email,
+      username,
+      userId,
+      provider,
+      providerId,
+      profileImage,
+      password: '', // 소셜 로그인은 비밀번호 없음
+    });
+
+    const savedUser = await this.userRepository.save(newUser);
 
     // JWT 토큰 생성
     const payload = {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      userId: user.userId,
+      id: savedUser.id,
+      email: savedUser.email,
+      username: savedUser.username,
+      userId: savedUser.userId,
     };
 
     const accessToken = this.jwtService.sign(payload);
-    const refreshToken = await this.generateRefreshToken(user.id);
-
-    // refreshToken 저장
-    await this.userRepository.update(user.id, { refreshToken });
+    const refreshToken = await this.generateRefreshToken(savedUser.id);
+    await this.userRepository.update(savedUser.id, { refreshToken });
 
     return {
-      user: plainToInstance(UserResponseDto, user, {
+      user: plainToInstance(UserResponseDto, savedUser, {
         excludeExtraneousValues: true,
       }),
       accessToken,

@@ -14,8 +14,9 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { SignupUserDto } from './dto/signup-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Response } from 'express';
 import { User } from 'src/entity/user.entity';
+import { Response } from 'express';
+import { SocialSignupDto } from './dto/social-signup.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -51,6 +52,14 @@ export class AuthController {
     return this.authService.refresh(body.refreshToken);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '현재 로그인된 사용자 정보 조회' })
+  me(@Request() req: any) {
+    return req.user;
+  }
+
   // Google OAuth 엔드포인트
   @Get('google')
   @UseGuards(AuthGuard('google'))
@@ -63,15 +72,36 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google 로그인 콜백' })
   googleAuthCallback(@Request() req: any, @Res() res: Response) {
-    // 프론트엔드로 리다이렉트 (토큰과 함께)
-    const { accessToken, refreshToken, user } = req.user as {
-      accessToken: string;
-      refreshToken: string;
-      user: User;
+    const result = req.user as {
+      accessToken?: string;
+      refreshToken?: string;
+      user?: User;
+      isNewUser: boolean;
+      email?: string;
+      provider?: string;
+      providerId?: string;
+      profileImage?: string;
+      tempUsername?: string;
     };
-    const userData = encodeURIComponent(JSON.stringify(user));
-    const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}&user=${userData}`;
-    res.redirect(redirectUrl);
+
+    if (result.isNewUser) {
+      // 새 사용자 - 회원가입 페이지로 리다이렉트
+      const signupData = encodeURIComponent(
+        JSON.stringify({
+          email: result.email,
+          provider: result.provider,
+          providerId: result.providerId,
+          profileImage: result.profileImage,
+          tempUsername: result.tempUsername,
+        }),
+      );
+      const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/social-signup?data=${signupData}`;
+      res.redirect(redirectUrl);
+    } else {
+      // 기존 사용자 - 로그인 완료
+      const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`;
+      res.redirect(redirectUrl);
+    }
   }
 
   // Kakao OAuth 엔드포인트
@@ -86,14 +116,45 @@ export class AuthController {
   @UseGuards(AuthGuard('kakao'))
   @ApiOperation({ summary: 'Kakao 로그인 콜백' })
   kakaoAuthCallback(@Request() req: any, @Res() res: Response) {
-    // 프론트엔드로 리다이렉트 (토큰과 함께)
-    const { accessToken, refreshToken, user } = req.user as {
-      accessToken: string;
-      refreshToken: string;
-      user: User;
+    const result = req.user as {
+      accessToken?: string;
+      refreshToken?: string;
+      user?: User;
+      isNewUser: boolean;
+      email?: string;
+      provider?: string;
+      providerId?: string;
+      profileImage?: string;
+      tempUsername?: string;
     };
-    const userData = encodeURIComponent(JSON.stringify(user));
-    const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}&user=${userData}`;
-    res.redirect(redirectUrl);
+
+    if (result.isNewUser) {
+      // 새 사용자 - 회원가입 페이지로 리다이렉트
+      const signupData = encodeURIComponent(
+        JSON.stringify({
+          email: result.email,
+          provider: result.provider,
+          providerId: result.providerId,
+          profileImage: result.profileImage,
+          tempUsername: result.tempUsername,
+        }),
+      );
+      const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/social-signup?data=${signupData}`;
+      res.redirect(redirectUrl);
+    } else {
+      // 기존 사용자 - 로그인 완료
+      const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`;
+      res.redirect(redirectUrl);
+    }
+  }
+
+  @Post('social-signup')
+  @ApiOperation({ summary: '소셜 회원가입 완료' })
+  @ApiBody({ type: SocialSignupDto })
+  async socialSignup(
+    @Body()
+    body: SocialSignupDto,
+  ) {
+    return this.authService.completeSocialSignup(body);
   }
 }

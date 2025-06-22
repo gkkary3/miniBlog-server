@@ -278,6 +278,7 @@ export class PostsService {
     const followingCount = user?.following?.length ?? 0;
 
     return {
+      user,
       posts: postsWithCounts,
       total,
       page,
