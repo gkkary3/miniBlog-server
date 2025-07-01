@@ -120,6 +120,10 @@ export class AuthService {
     return hash(password, DEFAULT_SALT);
   }
 
+  async me(id: number) {
+    return await this.userRepository.findOneBy({ id });
+  }
+
   async refresh(refreshToken: string) {
     try {
       // refreshToken 검증

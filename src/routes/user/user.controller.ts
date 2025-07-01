@@ -48,8 +48,13 @@ export class UserController {
     summary: '사용자 정보 수정',
     description: '사용자의 정보를 수정합니다.',
   })
-  updateUser(@Param('id') id: number, @Body() body: UpdateUserDto) {
-    return this.userService.updateUser(id, body);
+  updateUser(
+    @Param('id') id: number,
+    @Body() body: UpdateUserDto,
+    @Request() req: any,
+  ) {
+    const currentUserId = req.user.id;
+    return this.userService.updateUser(id, body, currentUserId);
   }
 
   @Delete(':id')

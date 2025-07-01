@@ -62,7 +62,8 @@ export class AuthController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '현재 로그인된 사용자 정보 조회' })
   me(@Request() req: any) {
-    return req.user;
+    // return req.user;
+    return this.authService.me(req.user.id);
   }
 
   // Google OAuth 엔드포인트

@@ -28,9 +28,29 @@ export class UserService {
     });
   }
 
-  async updateUser(id: number, body: UpdateUserDto) {
+  async updateUser(id: number, body: UpdateUserDto, currentUserId: number) {
+    if (id !== currentUserId) {
+      throw new HttpException(
+        '자신의 정보만 수정할 수 있습니다.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
     const user = await this.userRepository.findOneBy({ id });
+
     if (!user) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+
+    if (user.userId != body.userId) {
+      const existingUser = await this.userRepository.findOneBy({
+        userId: body.userId,
+      });
+      if (existingUser) {
+        throw new HttpException(
+          '이미 사용 중인 아이디입니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
 
     await this.userRepository.update(id, body);
 
