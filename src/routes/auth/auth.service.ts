@@ -184,7 +184,8 @@ export class AuthService {
       // 기존 사용자 업데이트 (프로필 이미지 등)
       await this.userRepository.update(user.id, {
         profileImage: socialUser.profileImage,
-        username: socialUser.username,
+        // username: socialUser.username,
+        username: user.username,
       });
       // JWT 토큰 생성
       const payload = {
