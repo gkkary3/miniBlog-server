@@ -74,7 +74,7 @@ export class UploadService {
       Key: fileName,
       Body: file.buffer,
       ContentType: file.mimetype,
-      ACL: 'public-read', // 퍼블릭 읽기 권한
+      // ACL 설정 제거 (버킷 정책으로 퍼블릭 읽기 권한 설정)
     });
 
     try {
