@@ -28,6 +28,9 @@ export class Post {
   @Column('text', { array: true, nullable: true })
   images: string[];
 
+  @Column({ type: 'text', nullable: true })
+  thumbnail: string;
+
   @Column()
   userId: number;
 

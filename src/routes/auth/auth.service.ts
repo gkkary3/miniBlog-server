@@ -183,7 +183,7 @@ export class AuthService {
     if (user) {
       // 기존 사용자 업데이트 (프로필 이미지 등)
       await this.userRepository.update(user.id, {
-        profileImage: socialUser.profileImage,
+        profileImage: user.profileImage,
         // username: socialUser.username,
         username: user.username,
       });

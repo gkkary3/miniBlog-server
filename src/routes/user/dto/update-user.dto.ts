@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUserDto {
@@ -23,4 +23,12 @@ export class UpdateUserDto {
   @IsString()
   @Length(2, 15)
   userId: string;
+
+  @ApiProperty({
+    description: '수정할 사용자 프로필 이미지',
+    example: 'https://example.com/profile.jpg',
+  })
+  @IsOptional()
+  @IsString()
+  profileImage: string;
 }

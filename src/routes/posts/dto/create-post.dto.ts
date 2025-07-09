@@ -46,4 +46,14 @@ export default class CreatePostDto {
   @ArrayMaxSize(100)
   @IsString({ each: true })
   images?: string[];
+
+  @ApiProperty({
+    description: '게시글 썸네일 이미지 URL',
+    example:
+      'https://miniblog-uploads-1.s3.ap-southeast-2.amazonaws.com/uploads/thumbnail-1234567890.jpg',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  thumbnail?: string;
 }
