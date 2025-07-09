@@ -15,30 +15,18 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/routes/auth/guards/jwt-auth.guard';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-
-// Multer 파일 타입 정의
-interface MulterFile {
-  fieldname: string;
-  originalname: string;
-  encoding: string;
-  mimetype: string;
-  size: number;
-  destination: string;
-  filename: string;
-  path: string;
-  buffer: Buffer;
-}
+import { UploadService } from './upload.service';
 
 @Controller('upload')
 export class UploadController {
+  constructor(private readonly uploadService: UploadService) {}
+
   @Post('image')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '이미지 업로드',
-    description: '이미지를 업로드합니다.',
+    description: '이미지를 AWS S3에 업로드합니다.',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -72,20 +60,9 @@ export class UploadController {
   })
   @UseInterceptors(
     FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          const filename = `${file.fieldname}-${uniqueSuffix}${ext}`;
-          console.log('🔧 Generated filename:', filename);
-          callback(null, filename);
-        },
-      }),
       fileFilter: (req, file, callback) => {
-        console.log('🔍 File filter - mimetype:', file.mimetype);
-        console.log('🔍 File filter - originalname:', file.originalname);
+        console.log('File filter - mimetype:', file.mimetype);
+        console.log('File filter - originalname:', file.originalname);
 
         const allowedMimeTypes = [
           'image/jpeg',
@@ -101,7 +78,7 @@ export class UploadController {
           !allowedMimeTypes.includes(file.mimetype) ||
           !file.originalname.match(allowedExtensions)
         ) {
-          console.log('❌ File rejected - not an image');
+          console.log('File rejected - not an image');
           return callback(
             new Error(
               `이미지 파일만 업로드 가능합니다! (허용 형식: jpg, jpeg, png, gif, webp)`,
@@ -110,7 +87,7 @@ export class UploadController {
           );
         }
 
-        console.log('✅ File accepted');
+        console.log('File accepted');
         callback(null, true);
       },
       limits: {
@@ -118,19 +95,28 @@ export class UploadController {
       },
     }),
   )
-  uploadImage(@UploadedFile() file: MulterFile) {
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('파일이 업로드되지 않았습니다.');
     }
-    console.log(file);
-    // 이미지 URL 생성
-    const imageUrl = `http://localhost:4000/uploads/${file.filename}`;
 
-    return {
-      success: true,
-      imageUrl,
-      originalName: file.originalname,
-      size: file.size,
-    };
+    console.log('📤 파일 업로드 시작:', file.originalname);
+
+    try {
+      // S3에 파일 업로드
+      const imageUrl = await this.uploadService.uploadFile(file);
+
+      console.log('S3 업로드 완료:', imageUrl);
+
+      return {
+        success: true,
+        imageUrl,
+        originalName: file.originalname,
+        size: file.size,
+      };
+    } catch (error) {
+      console.error('업로드 실패:', error);
+      throw new BadRequestException('파일 업로드에 실패했습니다.');
+    }
   }
 }

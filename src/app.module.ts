@@ -12,7 +12,6 @@ import { AuthModule } from './routes/auth/auth.module';
 import { CommentController } from './routes/comment/comment.controller';
 import { CommentModule } from './routes/comment/comment.module';
 import { PostsController } from './routes/posts/posts.controller';
-import { UploadController } from './routes/upload/upload.controller';
 import { UploadModule } from './routes/upload/upload.module';
 
 @Module({
@@ -35,12 +34,7 @@ import { UploadModule } from './routes/upload/upload.module';
     CommentModule,
     UploadModule,
   ],
-  controllers: [
-    AppController,
-    CommentController,
-    PostsController,
-    UploadController,
-  ],
+  controllers: [AppController, CommentController, PostsController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
