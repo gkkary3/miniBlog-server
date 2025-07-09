@@ -17,6 +17,16 @@ import {
 import { JwtAuthGuard } from 'src/routes/auth/guards/jwt-auth.guard';
 import { UploadService } from './upload.service';
 
+// Multer 파일 타입 정의
+interface UploadFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+}
+
 @Controller('upload')
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
@@ -61,8 +71,8 @@ export class UploadController {
   @UseInterceptors(
     FileInterceptor('image', {
       fileFilter: (req, file, callback) => {
-        console.log('File filter - mimetype:', file.mimetype);
-        console.log('File filter - originalname:', file.originalname);
+        console.log('🔍 File filter - mimetype:', file.mimetype);
+        console.log('🔍 File filter - originalname:', file.originalname);
 
         const allowedMimeTypes = [
           'image/jpeg',
@@ -78,7 +88,7 @@ export class UploadController {
           !allowedMimeTypes.includes(file.mimetype) ||
           !file.originalname.match(allowedExtensions)
         ) {
-          console.log('File rejected - not an image');
+          console.log('❌ File rejected - not an image');
           return callback(
             new Error(
               `이미지 파일만 업로드 가능합니다! (허용 형식: jpg, jpeg, png, gif, webp)`,
@@ -87,7 +97,7 @@ export class UploadController {
           );
         }
 
-        console.log('File accepted');
+        console.log('✅ File accepted');
         callback(null, true);
       },
       limits: {
@@ -95,7 +105,7 @@ export class UploadController {
       },
     }),
   )
-  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+  async uploadImage(@UploadedFile() file: UploadFile) {
     if (!file) {
       throw new BadRequestException('파일이 업로드되지 않았습니다.');
     }
@@ -106,7 +116,7 @@ export class UploadController {
       // S3에 파일 업로드
       const imageUrl = await this.uploadService.uploadFile(file);
 
-      console.log('S3 업로드 완료:', imageUrl);
+      console.log('✅ S3 업로드 완료:', imageUrl);
 
       return {
         success: true,
@@ -115,7 +125,7 @@ export class UploadController {
         size: file.size,
       };
     } catch (error) {
-      console.error('업로드 실패:', error);
+      console.error('❌ 업로드 실패:', error);
       throw new BadRequestException('파일 업로드에 실패했습니다.');
     }
   }

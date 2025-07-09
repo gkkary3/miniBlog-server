@@ -3,6 +3,16 @@ import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 
+// Multer 파일 타입 정의
+interface UploadFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+}
+
 @Injectable()
 export class UploadService {
   private s3Client: S3Client;
@@ -39,7 +49,7 @@ export class UploadService {
     this.bucketName = awsBucketName;
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<string> {
+  async uploadFile(file: UploadFile): Promise<string> {
     const fileName = `${uuidv4()}-${file.originalname}`;
 
     const command = new PutObjectCommand({
