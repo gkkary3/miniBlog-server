@@ -15,8 +15,9 @@ interface UploadFile {
 
 @Injectable()
 export class UploadService {
-  private s3Client: S3Client;
+  private s3Client: S3Client | null = null;
   private bucketName: string;
+  private isConfigured: boolean = false;
 
   constructor(private configService: ConfigService) {
     // 환경변수 검증
@@ -33,23 +34,39 @@ export class UploadService {
       !awsSecretAccessKey ||
       !awsBucketName
     ) {
-      throw new Error(
-        'AWS S3 환경변수가 설정되지 않았습니다. .env 파일을 확인하세요.',
+      console.warn(
+        '⚠️ AWS S3 환경변수가 설정되지 않았습니다. 업로드 기능이 비활성화됩니다.',
       );
+      console.warn(
+        '필요한 환경변수: AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET_NAME',
+      );
+      this.isConfigured = false;
+      return;
     }
 
-    this.s3Client = new S3Client({
-      region: awsRegion,
-      credentials: {
-        accessKeyId: awsAccessKeyId,
-        secretAccessKey: awsSecretAccessKey,
-      },
-    });
+    try {
+      this.s3Client = new S3Client({
+        region: awsRegion,
+        credentials: {
+          accessKeyId: awsAccessKeyId,
+          secretAccessKey: awsSecretAccessKey,
+        },
+      });
 
-    this.bucketName = awsBucketName;
+      this.bucketName = awsBucketName;
+      this.isConfigured = true;
+      console.log('✅ AWS S3 설정 완료');
+    } catch (error) {
+      console.error('❌ AWS S3 설정 실패:', error);
+      this.isConfigured = false;
+    }
   }
 
   async uploadFile(file: UploadFile): Promise<string> {
+    if (!this.isConfigured || !this.s3Client) {
+      throw new Error('AWS S3가 설정되지 않았습니다. 환경변수를 확인하세요.');
+    }
+
     const fileName = `${uuidv4()}-${file.originalname}`;
 
     const command = new PutObjectCommand({
