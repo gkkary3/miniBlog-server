@@ -17,11 +17,33 @@ import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/entity/user.entity';
 import { Response } from 'express';
 import { SocialSignupDto } from './dto/social-signup.dto';
+import { SendVerificationDto } from './dto/send-verification.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Post('send-verification')
+  @ApiOperation({
+    summary: '이메일 인증번호 발송',
+    description: '회원가입을 위한 6자리 인증번호를 이메일로 발송합니다.',
+  })
+  @ApiBody({ type: SendVerificationDto })
+  async sendVerification(@Body() sendVerificationDto: SendVerificationDto) {
+    return this.authService.sendVerificationCode(sendVerificationDto);
+  }
+
+  @Post('verify-email')
+  @ApiOperation({
+    summary: '이메일 인증번호 확인',
+    description: '발송된 6자리 인증번호를 확인하여 이메일을 인증합니다.',
+  })
+  @ApiBody({ type: VerifyEmailDto })
+  async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
+    return this.authService.verifyEmail(verifyEmailDto);
+  }
 
   @Post('signup')
   @ApiOperation({ summary: '회원가입' })

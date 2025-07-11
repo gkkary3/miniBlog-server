@@ -9,14 +9,24 @@ import { SignupUserDto } from './dto/signup-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SocialSignupDto } from './dto/social-signup.dto';
+import { EmailService } from './services/email.service';
+import { SendVerificationDto } from './dto/send-verification.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @Injectable()
 export class AuthService {
+  // 인증번호 임시 저장소 (메모리)
+  private verificationCodes = new Map<
+    string,
+    { code: string; expiresAt: Date }
+  >();
+
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
   ) {}
 
   async validateUser(email: string, password: string) {
@@ -269,5 +279,98 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  // 인증번호 발송
+  async sendVerificationCode(sendVerificationDto: SendVerificationDto) {
+    const { email } = sendVerificationDto;
+
+    // 이미 가입된 이메일인지 확인
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new HttpException(
+        '이미 가입된 이메일입니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // 6자리 랜덤 인증번호 생성
+    const verificationCode = this.emailService.generateVerificationCode();
+
+    // 5분 후 만료
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 5);
+
+    // 메모리에 저장
+    this.verificationCodes.set(email, {
+      code: verificationCode,
+      expiresAt,
+    });
+
+    // 이메일 발송
+    await this.emailService.sendVerificationEmail(email, verificationCode);
+
+    return {
+      success: true,
+      message: '인증번호가 이메일로 발송되었습니다.',
+      data: {
+        email,
+        expiresAt,
+        expiresInMinutes: 5,
+      },
+    };
+  }
+
+  // 인증번호 확인
+  async verifyEmail(verifyEmailDto: VerifyEmailDto) {
+    const { email, verificationCode } = verifyEmailDto;
+
+    // 저장된 인증번호 확인
+    const storedData = this.verificationCodes.get(email);
+
+    if (!storedData) {
+      throw new HttpException(
+        '인증번호가 발송되지 않았거나 만료되었습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // 만료 시간 확인
+    if (new Date() > storedData.expiresAt) {
+      this.verificationCodes.delete(email);
+      throw new HttpException(
+        '인증번호가 만료되었습니다. 다시 발송해주세요.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // 인증번호 일치 확인
+    if (storedData.code !== verificationCode) {
+      throw new HttpException(
+        '인증번호가 일치하지 않습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // 인증 성공 시 저장소에서 제거
+    this.verificationCodes.delete(email);
+
+    return {
+      success: true,
+      message: '이메일 인증이 완료되었습니다.',
+      data: {
+        email,
+        verified: true,
+        verifiedAt: new Date(),
+      },
+    };
+  }
+
+  // 인증된 이메일인지 확인하는 헬퍼 메서드
+  isEmailVerified(email: string): boolean {
+    return !this.verificationCodes.has(email);
   }
 }

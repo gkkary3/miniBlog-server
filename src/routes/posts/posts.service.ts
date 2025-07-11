@@ -199,17 +199,59 @@ export class PostsService {
     const comments = await this.commentRepository.find({
       where: { postId: id },
       relations: ['user'],
+      order: { createdAt: 'ASC' },
     });
 
     if (!comments) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 
-    return comments;
+    // 계층 구조로 변환
+    const parentComments = comments.filter((comment) => !comment.parentId);
+    const replyComments = comments.filter((comment) => comment.parentId);
+
+    // 각 원댓글에 대댓글들을 추가
+    const structuredComments = parentComments.map((parent) => ({
+      ...parent,
+      replies: replyComments.filter((reply) => reply.parentId === parent.id),
+    }));
+
+    return structuredComments;
   }
 
   async createComment(id: number, body: CreateCommentDto, userId: number) {
     const post = await this.postRepository.findOneBy({ id });
 
     if (!post) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+
+    // 대댓글인 경우 추가 검증
+    if (body.parentId) {
+      // 부모 댓글이 존재하는지 확인
+      const parentComment = await this.commentRepository.findOneBy({
+        id: body.parentId,
+      });
+
+      if (!parentComment) {
+        throw new HttpException(
+          'Parent comment not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      // 부모 댓글이 같은 게시글에 속하는지 확인
+      if (parentComment.postId !== id) {
+        throw new HttpException(
+          'Parent comment does not belong to this post',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // 대댓글에 대댓글 방지 (2단계 제한)
+      if (parentComment.parentId) {
+        throw new HttpException(
+          'Cannot reply to a reply',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
 
     return this.commentRepository.save({ ...body, postId: id, userId });
   }
