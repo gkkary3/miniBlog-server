@@ -44,7 +44,7 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => Post, (post) => post.user)
+  @OneToMany(() => Post, (post) => post.user, { cascade: true })
   posts: Post[];
 
   @Column({ type: 'varchar', nullable: true, select: false })
@@ -53,7 +53,7 @@ export class User {
   @ManyToMany(() => Post, (post) => post.likedUsers)
   likedPosts: Post[];
 
-  @OneToMany(() => Comment, (comment) => comment.user)
+  @OneToMany(() => Comment, (comment) => comment.user, { cascade: true })
   comments: Comment[];
 
   @ManyToMany(() => User, (user) => user.followers)

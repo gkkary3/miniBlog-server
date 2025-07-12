@@ -58,9 +58,20 @@ export class UserService {
   }
 
   async deleteUser(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['followers', 'following', 'likedPosts'],
+    });
+
     if (!user) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 
+    // ManyToMany 관계 정리 (CASCADE DELETE로 처리되지 않음)
+    user.followers = [];
+    user.following = [];
+    user.likedPosts = [];
+    await this.userRepository.save(user);
+
+    // 사용자 삭제 (데이터베이스 CASCADE로 posts, comments 자동 삭제)
     return this.userRepository.delete(id);
   }
 
