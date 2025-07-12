@@ -22,4 +22,7 @@ export default new DataSource({
   synchronize: false,
   migrations: ['src/database/migrations/*.ts'],
   migrationsTableName: 'migrations',
+  extra: {
+    timezone: 'Asia/Seoul', // 한국 시간대 설정
+  },
 });

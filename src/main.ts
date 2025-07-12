@@ -5,6 +5,10 @@ import { HttpExceptionFilter } from './exceptions/http.exceptions';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+
+// 한국 시간대 설정
+process.env.TZ = 'Asia/Seoul';
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   // CORS 설정 추가
