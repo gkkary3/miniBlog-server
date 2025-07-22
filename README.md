@@ -4,30 +4,32 @@
 
 ## 🔗 Demo
 
-- **홈페이지**: [https://miniblog-server.onrender.com/](https://miniblog-server.onrender.com/)
 - **API 문서**: [https://miniblog-server.onrender.com/api](https://miniblog-server.onrender.com/api)
+- **클라이언트**: [https://github.com/gkkary3/miniBlog-client](https://github.com/gkkary3/miniBlog-client)
 
 ## 기능
 
-| 기능            | 설명                    | 인증 필요 |
-| --------------- | ----------------------- | --------- |
-| 회원가입/로그인 | JWT 기반 인증           | ❌        |
-| 소셜 로그인     | Google, Kakao OAuth     | ❌        |
-| 토큰 갱신       | Refresh Token 기반      | ❌        |
-| 게시글 CRUD     | 글 작성, 수정, 삭제     | ✅        |
-| 게시글 검색     | 제목, 내용, 작성자 검색 | ❌        |
-| 댓글 시스템     | 게시글 댓글 관리        | ✅        |
-| 좋아요          | 게시글 좋아요/취소      | ✅        |
-| 카테고리        | 글 분류 시스템          | ✅        |
-| 이미지 업로드   | 게시글 이미지 첨부      | ✅        |
-| 사용자 팔로우   | 팔로우/언팔로우         | ✅        |
-| 게시글 조회     | 모든 사용자 글 조회     | ❌        |
+| 기능            | 설명                           | 인증 필요 |
+| --------------- | ------------------------------ | --------- |
+| 회원가입/로그인 | JWT 기반 인증                  | ❌        |
+| 이메일 인증     | 회원가입 시 이메일 인증        | ❌        |
+| 소셜 로그인     | Google, Kakao OAuth            | ❌        |
+| 토큰 갱신       | Refresh Token 기반             | ❌        |
+| 게시글 CRUD     | 글 작성, 수정, 삭제            | ✅        |
+| 게시글 검색     | 제목, 내용, 작성자 검색        | ❌        |
+| 댓글 시스템     | 게시글 댓글 관리 (대댓글 지원) | ✅        |
+| 좋아요          | 게시글 좋아요/취소             | ✅        |
+| 카테고리        | 글 분류 시스템                 | ✅        |
+| 이미지 업로드   | 게시글 이미지 첨부             | ✅        |
+| 썸네일          | 게시글 썸네일 이미지           | ✅        |
+| 사용자 팔로우   | 팔로우/언팔로우                | ✅        |
+| 게시글 조회     | 모든 사용자 글 조회            | ❌        |
 
 ## 기술 스택
 
 **Backend**
 
-- NestJS, TypeORM, JWT, Passport, Swagger, Multer
+- NestJS, TypeORM, JWT, Passport, Swagger, Multer, Nodemailer
 
 **Database**
 
@@ -48,12 +50,12 @@ User
 
 Post
 ├─ id, title, content, userId, username
-├─ images[] (이미지 URL 배열)
+├─ images[] (이미지 URL 배열), thumbnail (썸네일)
 └─ 관계: user, comments[], likedUsers[], categories[]
 
 Comment
-├─ id, content, userId, postId
-└─ 관계: user, post
+├─ id, content, userId, postId, parentId (대댓글용)
+└─ 관계: user, post, parent, replies[]
 
 Category
 ├─ id, name
@@ -72,6 +74,9 @@ npm install
 DATABASE_URL=your_database_url
 DIRECT_URL=your_direct_url
 JWT_SECRET=your_jwt_secret
+
+# 이메일 인증 설정
+EMAIL_PASSWORD=your_gmail_app_password
 
 # 소셜 로그인 설정
 GOOGLE_CLIENT_ID=your_google_client_id
@@ -96,18 +101,20 @@ npm run start:dev
 ### 인증
 
 ```bash
-POST /auth/signup           # 회원가입
-POST /auth/login            # 로그인
-POST /auth/logout           # 로그아웃 (인증 필요)
-POST /auth/refresh          # 토큰 갱신
-GET  /auth/me               # 현재 사용자 정보 (인증 필요)
+POST /auth/send-verification    # 이메일 인증번호 발송
+POST /auth/verify-email         # 이메일 인증번호 확인
+POST /auth/signup               # 회원가입
+POST /auth/login                # 로그인
+POST /auth/logout               # 로그아웃 (인증 필요)
+POST /auth/refresh              # 토큰 갱신
+GET  /auth/me                   # 현재 사용자 정보 (인증 필요)
 
 # 소셜 로그인
-GET  /auth/google           # Google 로그인 시작
-GET  /auth/google/callback  # Google 로그인 콜백
-GET  /auth/kakao            # Kakao 로그인 시작
-GET  /auth/kakao/callback   # Kakao 로그인 콜백
-POST /auth/social-signup    # 소셜 회원가입 완료
+GET  /auth/google               # Google 로그인 시작
+GET  /auth/google/callback      # Google 로그인 콜백
+GET  /auth/kakao                # Kakao 로그인 시작
+GET  /auth/kakao/callback       # Kakao 로그인 콜백
+POST /auth/social-signup        # 소셜 회원가입 완료
 ```
 
 ### 게시글
@@ -124,11 +131,13 @@ DELETE /posts/@userId/:id          # 게시글 삭제 (인증 필요)
 ### 댓글/좋아요
 
 ```bash
-GET    /posts/@userId/:id/comments    # 댓글 조회 (공개)
-POST   /posts/@userId/:id/comments    # 댓글 작성 (인증 필요)
-GET    /posts/@userId/:id/likes       # 좋아요 조회 (인증 필요)
-POST   /posts/@userId/:id/like        # 좋아요 (인증 필요)
-DELETE /posts/@userId/:id/like        # 좋아요 취소 (인증 필요)
+GET    /posts/@userId/:id/comments     # 댓글 조회 (공개, 대댓글 포함)
+POST   /posts/@userId/:id/comments     # 댓글/대댓글 작성 (인증 필요)
+PUT    /posts/@userId/:id/comments/:commentId  # 댓글 수정 (인증 필요)
+DELETE /comment/:id                    # 댓글 삭제 (인증 필요)
+GET    /posts/@userId/:id/likes        # 좋아요 조회 (인증 필요)
+POST   /posts/@userId/:id/like         # 좋아요 (인증 필요)
+DELETE /posts/@userId/:id/like         # 좋아요 취소 (인증 필요)
 ```
 
 ### 사용자 관리
@@ -159,6 +168,27 @@ GET /posts?search=검색어&page=1&limit=10&sortBy=latest
 - `search`: 제목, 내용, 카테고리, 작성자, 작성자ID 통합 검색
 - `sortBy`: `latest` (최신순), `likes` (좋아요순), `comments` (댓글순)
 
+**댓글 작성 시 대댓글**
+
+```json
+{
+  "content": "댓글 내용",
+  "parentId": 1 // 대댓글인 경우 부모 댓글 ID
+}
+```
+
+**게시글 작성 시 썸네일**
+
+```json
+{
+  "title": "게시글 제목",
+  "content": "게시글 내용",
+  "images": ["이미지URL1", "이미지URL2"],
+  "thumbnail": "썸네일URL",
+  "categories": ["카테고리1", "카테고리2"]
+}
+```
+
 **Swagger 인증 설정**
 
 1. `/api`에서 우상단 "Authorize" 클릭
@@ -170,9 +200,9 @@ GET /posts?search=검색어&page=1&limit=10&sortBy=latest
 ```
 src/
 ├── routes/
-│   ├── auth/         # 인증 (소셜 로그인 포함)
-│   ├── posts/        # 게시글 (검색 기능 포함)
-│   ├── comment/      # 댓글
+│   ├── auth/         # 인증 (소셜 로그인, 이메일 인증 포함)
+│   ├── posts/        # 게시글 (검색, 썸네일 기능 포함)
+│   ├── comment/      # 댓글 (대댓글 지원)
 │   ├── user/         # 사용자 (팔로우 기능 포함)
 │   └── upload/       # 파일 업로드
 ├── entity/           # DB 엔티티
@@ -195,7 +225,10 @@ npm run lint                  # 린트
 ## 특징
 
 - JWT 토큰 기반 인증/인가 (Access Token + Refresh Token)
+- **이메일 인증**: Gmail SMTP를 통한 6자리 인증번호 발송
 - Google, Kakao 소셜 로그인 지원
+- **대댓글 시스템**: 2단계 댓글 구조 (원댓글 → 대댓글)
+- **썸네일 기능**: 게시글별 썸네일 이미지 설정
 - TypeORM 마이그레이션 관리
 - Swagger API 문서 자동 생성
 - PostgreSQL 연동
@@ -203,3 +236,9 @@ npm run lint                  # 린트
 - 사용자 팔로우 시스템
 - 게시글 검색 및 정렬 기능
 - 실제 배포 환경 구성
+
+## 관련 링크
+
+- **클라이언트 저장소**: [https://github.com/gkkary3/miniBlog-client](https://github.com/gkkary3/miniBlog-client)
+- **API 문서**: [https://miniblog-server.onrender.com/api](https://miniblog-server.onrender.com/api)
+- **데모 사이트**: [https://miniblog-server.onrender.com/](https://miniblog-server.onrender.com/)
