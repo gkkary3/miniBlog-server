@@ -35,7 +35,7 @@ export class Comment {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Post, (post) => post.comments)
+  @ManyToOne(() => Post, (post) => post.comments, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'postId' })
   post: Post;
 
