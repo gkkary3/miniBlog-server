@@ -50,4 +50,12 @@ export class SocialSignupDto {
   @IsString()
   @IsOptional()
   profileImage?: string;
+
+  @ApiProperty({
+    description: '임시 사용자 이름',
+    example: '홍길동',
+  })
+  @IsString()
+  @IsOptional()
+  tempUsername: string;
 }

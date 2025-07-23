@@ -183,6 +183,10 @@ export class AuthController {
     @Body()
     body: SocialSignupDto,
   ) {
+    console.log(
+      '🔍 Social signup request body:',
+      JSON.stringify(body, null, 2),
+    );
     return this.authService.completeSocialSignup(body);
   }
 }
