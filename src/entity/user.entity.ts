@@ -56,7 +56,7 @@ export class User {
   @OneToMany(() => Comment, (comment) => comment.user, { cascade: true })
   comments: Comment[];
 
-  @ManyToMany(() => User, (user) => user.followers, { cascade: true })
+  @ManyToMany(() => User, (user) => user.followers)
   @JoinTable({
     name: 'user_followers_user', // 테이블 이름 명시
     joinColumn: {
@@ -70,6 +70,6 @@ export class User {
   })
   following: User[];
 
-  @ManyToMany(() => User, (user) => user.following, { cascade: true })
+  @ManyToMany(() => User, (user) => user.following)
   followers: User[];
 }
