@@ -242,3 +242,7 @@ npm run lint                  # 린트
 - **클라이언트 저장소**: [https://github.com/gkkary3/miniBlog-client](https://github.com/gkkary3/miniBlog-client)
 - **API 문서**: [https://miniblog-server.onrender.com/api](https://miniblog-server.onrender.com/api)
 - **데모 사이트**: [https://miniblog-server.onrender.com/](https://miniblog-server.onrender.com/)
+
+<!-- DB 마이그레이션 -->
+<!-- npm run migration:generate -- src/database/migrations/UpdateCommentForeignKey
+npm run migration:run -->

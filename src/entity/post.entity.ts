@@ -47,9 +47,7 @@ export class Post {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @OneToMany(() => Comment, (comment) => comment.post, {
-    cascade: true,
-  })
+  @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
 
   @ManyToMany(() => User, (user) => user.likedPosts)

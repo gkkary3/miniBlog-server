@@ -143,7 +143,7 @@ export class AuthService {
 
       // DB에서 사용자 및 refreshToken 확인
       const user = await this.userRepository.findOne({
-        where: { id: payload.id, refreshToken },
+        where: { id: payload.userId, refreshToken },
         select: ['id', 'email', 'userId', 'username', 'refreshToken'],
       });
 
@@ -159,6 +159,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         username: user.username,
+        userId: user.userId,
       });
 
       return { accessToken: newAccessToken };
