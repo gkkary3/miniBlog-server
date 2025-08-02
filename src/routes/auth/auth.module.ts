@@ -19,9 +19,9 @@ import { EmailService } from './services/email.service';
     PassportModule,
     TypeOrmModule.forFeature([User]),
     JwtModule.register({
-      secret: 'secret_key',
+      secret: process.env.JWT_SECRET || 'secret_key',
       signOptions: {
-        expiresIn: '15m',
+        expiresIn: '1m',
       },
     }),
   ],

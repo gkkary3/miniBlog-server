@@ -49,7 +49,7 @@ export class AuthService {
   async generateRefreshToken(userId: number): Promise<string> {
     const payload = { userId, type: 'refresh' };
     return this.jwtService.sign(payload, {
-      secret: 'refresh_secret_key', // 다른 시크릿 키 사용
+      secret: process.env.JWT_REFRESH_SECRET || 'refresh_secret_key', // 다른 시크릿 키 사용
       expiresIn: '7d', // 7일
     });
   }
@@ -136,10 +136,15 @@ export class AuthService {
 
   async refresh(refreshToken: string) {
     try {
+      console.log('🔄 Starting refresh token process...');
+      console.log('🔄 Refresh token received:', refreshToken ? 'Yes' : 'No');
+      
       // refreshToken 검증
       const payload = this.jwtService.verify(refreshToken, {
-        secret: 'refresh_secret_key',
+        secret: process.env.JWT_REFRESH_SECRET || 'refresh_secret_key',
       });
+      
+      console.log('🔄 Token payload:', { userId: payload.userId, type: payload.type });
 
       // DB에서 사용자 및 refreshToken 확인
       const user = await this.userRepository.findOne({
@@ -147,7 +152,15 @@ export class AuthService {
         select: ['id', 'email', 'userId', 'username', 'refreshToken'],
       });
 
+      console.log('🔄 User found:', !!user);
+      if (user) {
+        console.log('🔄 User details:', { id: user.id, email: user.email });
+      }
+
       if (!user) {
+        console.log('❌ User not found or refresh token mismatch');
+        console.log('❌ Expected userId:', payload.userId);
+        console.log('❌ Provided refreshToken:', refreshToken);
         throw new HttpException(
           'Invalid refresh token',
           HttpStatus.UNAUTHORIZED,
@@ -162,8 +175,11 @@ export class AuthService {
         userId: user.userId,
       });
 
+      console.log('✅ New access token generated successfully');
       return { accessToken: newAccessToken };
-    } catch {
+    } catch (error) {
+      console.error('❌ Refresh token error:', error);
+      console.error('❌ Error message:', error.message);
       throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
   }
