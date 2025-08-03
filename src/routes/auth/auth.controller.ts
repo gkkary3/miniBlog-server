@@ -75,17 +75,19 @@ export class AuthController {
 
   @Post('refresh')
   @ApiOperation({ summary: '토큰 갱신' })
-  async refresh(@Body() body: { refreshToken: string }) {
+  async refresh(
+    @Body() body: { accessToken: string },
+    @Request() req: any,
+  ) {
+    const refreshToken = req.headers.authorization?.replace('Bearer ', '');
+    const accessToken = body.accessToken;
+    
     console.log('🔄 refresh 엔드포인트 - 받은 body:', body);
-    console.log(
-      '🔄 refresh 엔드포인트 - refreshToken 존재 여부:',
-      !!body.refreshToken,
-    );
-    console.log(
-      '🔄 refresh 엔드포인트 - refreshToken 길이:',
-      body.refreshToken?.length,
-    );
-    return this.authService.refresh(body.refreshToken);
+    console.log('🔄 refresh 엔드포인트 - Authorization 헤더:', req.headers.authorization);
+    console.log('🔄 refresh 엔드포인트 - 추출된 refreshToken:', refreshToken?.substring(0, 20) + '...');
+    console.log('🔄 refresh 엔드포인트 - accessToken:', accessToken?.substring(0, 20) + '...');
+    
+    return this.authService.refresh(refreshToken, accessToken);
   }
 
   @UseGuards(JwtAuthGuard)

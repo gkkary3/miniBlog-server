@@ -154,11 +154,15 @@ export class AuthService {
     return await this.userRepository.findOneBy({ id });
   }
 
-  async refresh(refreshToken: string) {
+  async refresh(refreshToken: string, accessToken: string) {
     try {
       console.log(
         '🔄 refresh - 받은 refreshToken:',
-        refreshToken.substring(0, 20) + '...',
+        refreshToken?.substring(0, 20) + '...',
+      );
+      console.log(
+        '🔄 refresh - 받은 accessToken:',
+        accessToken?.substring(0, 20) + '...',
       );
       console.log(
         '🔄 refresh - JWT_REFRESH_SECRET 값:',
@@ -168,19 +172,50 @@ export class AuthService {
         '🔄 refresh - JWT_REFRESH_SECRET이 undefined인가?',
         process.env.JWT_REFRESH_SECRET === undefined,
       );
-      // refreshToken 검증
-      const payload = this.jwtService.verify(refreshToken, {
+
+      // 1. refreshToken 검증
+      const refreshPayload = this.jwtService.verify(refreshToken, {
         secret: process.env.JWT_REFRESH_SECRET || 'refresh_secret_key',
       });
 
-      console.log('🔄 refresh - 토큰 검증 성공, payload:', payload);
+      console.log(
+        '🔄 refresh - refreshToken 검증 성공, payload:',
+        refreshPayload,
+      );
 
-      console.log('🔄 refresh - payload.userId:', payload.userId);
-      console.log('🔄 refresh - payload:', payload);
+      // 2. 만료된 accessToken 검증 (만료 여부는 무시하고 구조만 확인)
+      let accessPayload;
+      try {
+        accessPayload = this.jwtService.verify(accessToken, {
+          secret: process.env.JWT_SECRET || 'secret_key',
+          ignoreExpiration: true, // 만료 여부는 무시
+        });
+        console.log(
+          '🔄 refresh - accessToken 구조 검증 성공, payload:',
+          accessPayload,
+        );
+      } catch (error) {
+        console.log('🔄 refresh - accessToken 구조 검증 실패:', error.message);
+        throw new HttpException(
+          'Invalid access token structure',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
 
-      // DB에서 사용자 및 refreshToken 확인
+      // 3. 두 토큰의 사용자 ID가 일치하는지 확인
+      if (refreshPayload.userId !== accessPayload.id) {
+        console.log('🔄 refresh - 토큰 사용자 ID 불일치:', {
+          refreshUserId: refreshPayload.userId,
+          accessUserId: accessPayload.id,
+        });
+        throw new HttpException('Token user mismatch', HttpStatus.UNAUTHORIZED);
+      }
+
+      console.log('🔄 refresh - payload.userId:', refreshPayload.userId);
+
+      // 4. DB에서 사용자 및 refreshToken 확인
       const user = await this.userRepository.findOne({
-        where: { id: payload.userId, refreshToken },
+        where: { id: refreshPayload.userId, refreshToken },
         select: ['id', 'email', 'userId', 'username', 'refreshToken'],
       });
 
@@ -205,15 +240,19 @@ export class AuthService {
         );
       }
 
-      // 새로운 accessToken 발급
+      // 5. 새로운 accessToken 발급
       const newAccessToken = this.jwtService.sign({
         id: user.id,
         email: user.email,
         username: user.username,
+        userId: user.userId,
       });
 
+      console.log('🔄 refresh - 새로운 accessToken 발급 완료');
+
       return { accessToken: newAccessToken };
-    } catch {
+    } catch (error) {
+      console.log('🔄 refresh - 에러 발생:', error.message);
       throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
   }
