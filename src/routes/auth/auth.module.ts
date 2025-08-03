@@ -18,10 +18,28 @@ import { EmailService } from './services/email.service';
     ConfigModule,
     PassportModule,
     TypeOrmModule.forFeature([User]),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'secret_key',
-      signOptions: {
-        expiresIn: '1m',
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: () => {
+        console.log('🔍 JWT_SECRET 환경변수 값:', process.env.JWT_SECRET);
+        console.log(
+          '🔍 JWT_SECRET이 undefined인가?',
+          process.env.JWT_SECRET === undefined,
+        );
+        console.log(
+          '🔍 JWT_SECRET이 null인가?',
+          process.env.JWT_SECRET === null,
+        );
+        console.log(
+          '🔍 JWT_SECRET이 빈 문자열인가?',
+          process.env.JWT_SECRET === '',
+        );
+        return {
+          secret: process.env.JWT_SECRET || 'secret_key',
+          signOptions: {
+            expiresIn: '1m',
+          },
+        };
       },
     }),
   ],
