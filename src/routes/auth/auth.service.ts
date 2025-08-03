@@ -77,7 +77,9 @@ export class AuthService {
       process.env.JWT_REFRESH_SECRET,
     );
 
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '15m', // 명시적으로 만료 시간 설정
+    });
     const refreshToken = await this.generateRefreshToken(user.id);
 
     console.log(
@@ -241,14 +243,26 @@ export class AuthService {
       }
 
       // 5. 새로운 accessToken 발급
-      const newAccessToken = this.jwtService.sign({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        userId: user.userId,
-      });
+      const newAccessToken = this.jwtService.sign(
+        {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          userId: user.userId,
+        },
+        {
+          expiresIn: '15m', // 명시적으로 만료 시간 설정
+        },
+      );
 
       console.log('🔄 refresh - 새로운 accessToken 발급 완료');
+      console.log(
+        '🔄 refresh - 새로운 accessToken:',
+        newAccessToken.substring(0, 20) + '...',
+      );
+      console.log('🔄 refresh - 반환할 데이터:', {
+        accessToken: newAccessToken.substring(0, 20) + '...',
+      });
 
       return { accessToken: newAccessToken };
     } catch (error) {

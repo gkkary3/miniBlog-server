@@ -37,7 +37,7 @@ import { EmailService } from './services/email.service';
         return {
           secret: process.env.JWT_SECRET || 'secret_key',
           signOptions: {
-            expiresIn: '10s',
+            expiresIn: '15m',
           },
         };
       },
