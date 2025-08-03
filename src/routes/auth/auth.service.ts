@@ -175,13 +175,30 @@ export class AuthService {
 
       console.log('🔄 refresh - 토큰 검증 성공, payload:', payload);
 
+      console.log('🔄 refresh - payload.userId:', payload.userId);
+      console.log('🔄 refresh - payload:', payload);
+
       // DB에서 사용자 및 refreshToken 확인
       const user = await this.userRepository.findOne({
-        where: { id: payload.id, refreshToken },
+        where: { id: payload.userId, refreshToken },
         select: ['id', 'email', 'userId', 'username', 'refreshToken'],
       });
 
+      console.log(
+        '🔄 refresh - DB에서 찾은 user:',
+        user
+          ? {
+              id: user.id,
+              email: user.email,
+              username: user.username,
+              hasRefreshToken: !!user.refreshToken,
+              refreshTokenLength: user.refreshToken?.length,
+            }
+          : null,
+      );
+
       if (!user) {
+        console.log('🔄 refresh - 사용자를 찾을 수 없음');
         throw new HttpException(
           'Invalid refresh token',
           HttpStatus.UNAUTHORIZED,

@@ -76,6 +76,15 @@ export class AuthController {
   @Post('refresh')
   @ApiOperation({ summary: '토큰 갱신' })
   async refresh(@Body() body: { refreshToken: string }) {
+    console.log('🔄 refresh 엔드포인트 - 받은 body:', body);
+    console.log(
+      '🔄 refresh 엔드포인트 - refreshToken 존재 여부:',
+      !!body.refreshToken,
+    );
+    console.log(
+      '🔄 refresh 엔드포인트 - refreshToken 길이:',
+      body.refreshToken?.length,
+    );
     return this.authService.refresh(body.refreshToken);
   }
 
