@@ -71,8 +71,19 @@ export class AuthService {
       userId: user.userId,
     };
 
+    console.log('🔑 login - JWT_SECRET 값:', process.env.JWT_SECRET);
+    console.log(
+      '🔑 login - JWT_REFRESH_SECRET 값:',
+      process.env.JWT_REFRESH_SECRET,
+    );
+
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = await this.generateRefreshToken(user.id);
+
+    console.log(
+      '🔑 login - 생성된 refreshToken:',
+      refreshToken.substring(0, 20) + '...',
+    );
 
     await this.userRepository.update(user.id, { refreshToken });
 
@@ -146,6 +157,10 @@ export class AuthService {
   async refresh(refreshToken: string) {
     try {
       console.log(
+        '🔄 refresh - 받은 refreshToken:',
+        refreshToken.substring(0, 20) + '...',
+      );
+      console.log(
         '🔄 refresh - JWT_REFRESH_SECRET 값:',
         process.env.JWT_REFRESH_SECRET,
       );
@@ -157,6 +172,8 @@ export class AuthService {
       const payload = this.jwtService.verify(refreshToken, {
         secret: process.env.JWT_REFRESH_SECRET || 'refresh_secret_key',
       });
+
+      console.log('🔄 refresh - 토큰 검증 성공, payload:', payload);
 
       // DB에서 사용자 및 refreshToken 확인
       const user = await this.userRepository.findOne({
