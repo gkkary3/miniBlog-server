@@ -6,8 +6,6 @@ import {
   Request,
   UseGuards,
   Res,
-  HttpException,
-  HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiBody, ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -82,7 +80,6 @@ export class AuthController {
     const accessToken = body.accessToken;
 
     console.log('🔄 refresh 엔드포인트 - 받은 body:', body);
-    console.log('🔄 refresh 엔드포인트 - 전체 헤더:', req.headers);
     console.log(
       '🔄 refresh 엔드포인트 - Authorization 헤더:',
       req.headers.authorization,
@@ -95,34 +92,6 @@ export class AuthController {
       '🔄 refresh 엔드포인트 - accessToken:',
       accessToken?.substring(0, 20) + '...',
     );
-    console.log(
-      '🔄 refresh 엔드포인트 - accessToken이 null인가?',
-      accessToken === null,
-    );
-    console.log(
-      '🔄 refresh 엔드포인트 - accessToken이 undefined인가?',
-      accessToken === undefined,
-    );
-    console.log(
-      '🔄 refresh 엔드포인트 - accessToken 타입:',
-      typeof accessToken,
-    );
-
-    if (!refreshToken) {
-      console.log('🔄 refresh 엔드포인트 - refreshToken이 없음');
-      throw new HttpException(
-        'Refresh token is required',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
-    if (!accessToken) {
-      console.log('🔄 refresh 엔드포인트 - accessToken이 없음');
-      throw new HttpException(
-        'Access token is required',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
 
     const result = await this.authService.refresh(refreshToken, accessToken);
     console.log('🔄 refresh 엔드포인트 - 서비스 응답:', {
@@ -166,15 +135,6 @@ export class AuthController {
       tempUsername?: string;
     };
 
-    console.log('🔑 Google OAuth 콜백 - 결과:', {
-      isNewUser: result.isNewUser,
-      hasAccessToken: !!result.accessToken,
-      hasRefreshToken: !!result.refreshToken,
-      user: result.user
-        ? { id: result.user.id, email: result.user.email }
-        : null,
-    });
-
     if (result.isNewUser) {
       // 새 사용자 - 회원가입 페이지로 리다이렉트
       const signupData = encodeURIComponent(
@@ -190,20 +150,7 @@ export class AuthController {
       res.redirect(redirectUrl);
     } else {
       // 기존 사용자 - 로그인 완료
-      // 토큰을 더 안전하게 전달하기 위해 state 파라미터 사용
-      const tokenData = encodeURIComponent(
-        JSON.stringify({
-          accessToken: result.accessToken,
-          refreshToken: result.refreshToken,
-          user: {
-            id: result.user?.id,
-            email: result.user?.email,
-            username: result.user?.username,
-            userId: result.user?.userId,
-          },
-        }),
-      );
-      const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?state=${tokenData}`;
+      const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`;
       res.redirect(redirectUrl);
     }
   }
@@ -232,15 +179,6 @@ export class AuthController {
       tempUsername?: string;
     };
 
-    console.log('🔑 Kakao OAuth 콜백 - 결과:', {
-      isNewUser: result.isNewUser,
-      hasAccessToken: !!result.accessToken,
-      hasRefreshToken: !!result.refreshToken,
-      user: result.user
-        ? { id: result.user.id, email: result.user.email }
-        : null,
-    });
-
     if (result.isNewUser) {
       // 새 사용자 - 회원가입 페이지로 리다이렉트
       const signupData = encodeURIComponent(
@@ -256,20 +194,7 @@ export class AuthController {
       res.redirect(redirectUrl);
     } else {
       // 기존 사용자 - 로그인 완료
-      // 토큰을 더 안전하게 전달하기 위해 state 파라미터 사용
-      const tokenData = encodeURIComponent(
-        JSON.stringify({
-          accessToken: result.accessToken,
-          refreshToken: result.refreshToken,
-          user: {
-            id: result.user?.id,
-            email: result.user?.email,
-            username: result.user?.username,
-            userId: result.user?.userId,
-          },
-        }),
-      );
-      const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?state=${tokenData}`;
+      const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`;
       res.redirect(redirectUrl);
     }
   }
