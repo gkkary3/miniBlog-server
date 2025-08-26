@@ -279,6 +279,14 @@ export class AuthService {
     providerId: string;
     profileImage?: string;
   }) {
+    console.log('🔑 handleSocialLogin - 입력 데이터:', {
+      email: socialUser.email,
+      username: socialUser.username,
+      provider: socialUser.provider,
+      providerId: socialUser.providerId,
+      hasProfileImage: !!socialUser.profileImage,
+    });
+
     // 기존 사용자 확인 (provider와 providerId로)
     let user = await this.userRepository.findOne({
       where: {
@@ -295,6 +303,13 @@ export class AuthService {
     }
 
     if (user) {
+      console.log('🔑 handleSocialLogin - 기존 사용자 발견:', {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        provider: user.provider,
+      });
+
       // 기존 사용자 업데이트 (프로필 이미지 등)
       await this.userRepository.update(user.id, {
         profileImage: user.profileImage,
@@ -312,6 +327,13 @@ export class AuthService {
       const accessToken = this.jwtService.sign(payload);
       const refreshToken = await this.generateRefreshToken(user.id);
 
+      console.log('🔑 handleSocialLogin - 토큰 생성 완료:', {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        accessTokenLength: accessToken?.length,
+        refreshTokenLength: refreshToken?.length,
+      });
+
       // refreshToken 저장
       await this.userRepository.update(user.id, { refreshToken });
 
@@ -324,6 +346,7 @@ export class AuthService {
         isNewUser: false,
       };
     } else {
+      console.log('🔑 handleSocialLogin - 새 사용자로 판단');
       return {
         isNewUser: true,
         email: socialUser.email,
